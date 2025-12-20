@@ -1,70 +1,72 @@
-/* --- NEW BRANDING: NEO-VEDIC LUXURY --- */
-/* Tenor Sans for that "High-End Magazine" look */
-/* Manrope for that "Modern Tech/App" feel */
-@import url('https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Manrope:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
-@import "tailwindcss"; 
+@import "tailwindcss";
 
 @theme {
-  /* --- NEW PALETTE: "The Divine Modern" --- */
+  /* --- OPTION 3: MODERN MINIMALIST PALETTE --- */
   
-  /* Backgrounds */
-  --color-heritage-paper: #FFFFFF;      /* PURE STARK WHITE (No more cream) */
-  --color-heritage-sand: #F8F8F8;       /* Ice Grey (Very subtle) */
-  --color-heritage-mist: #F3F3F3;       /* Light Grey for hovers */
-  
-  /* Typography & Icons */
-  --color-heritage-charcoal: #000000;   /* JET BLACK (No more brown) */
-  --color-heritage-grey: #666666;       /* Neutral Grey */
-  --color-heritage-border: #E5E5E5;     /* Clean borders */
-  
-  /* Luxury Accents */
-  --color-heritage-gold: #C8AA6E;       /* CHAMPAGNE GOLD (More expensive looking than yellow gold) */
-  --color-heritage-clay: #B09259;       /* Darker Champagne */
-  --color-heritage-saffron: #000000;    /* We use Black for "Add to Cart" now (More luxury) */
+  /* Fonts */
+  --font-cinzel: "Montserrat", sans-serif;   
+  --font-manrope: "Inter", sans-serif;       
 
-  /* --- NEW FONTS --- */
-  /* We remap the old variable names to the NEW fonts so you don't have to change every file */
-  --font-cormorant: "Tenor Sans", sans-serif;    /* The "Vogue" look */
-  --font-montserrat: "Manrope", sans-serif;      /* The "App" look */
+  /* Colors */
+  --color-heritage-paper: #FFFFFF;       /* Pure White (Background) */
+  --color-heritage-sand: #FAFAFA;        /* Subtle Off-White (Secondary) */
+  --color-heritage-mist: #E5E7EB;        /* Light Grey Borders */
+  
+  --color-heritage-charcoal: #000000;    /* Pure Black (Text) */
+  --color-heritage-grey: #4B5563;        /* Cool Grey (Secondary Text) */
+  
+  /* Accents */
+  --color-heritage-rudraksha: #2C1810;   /* DARK COFFEE (Primary Brand Color) */
+  --color-heritage-saffron: #F2C75C;     /* BRIGHT GOLD (Accent/Hover) */
+  --color-heritage-gold: #F2C75C;        /* Star Rating Gold */
 
-  /* ANIMATIONS */
+  /* Animations */
   --animate-fade-up: fadeUp 0.8s ease-out forwards;
+  
   @keyframes fadeUp { 
     from { opacity: 0; transform: translateY(20px); } 
     to { opacity: 1; transform: translateY(0); } 
   }
 }
 
-/* GLOBAL RESETS */
-html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
-body {
-  background-color: var(--color-heritage-paper);
-  color: var(--color-heritage-charcoal);
-  font-family: var(--font-montserrat);
-  -webkit-font-smoothing: antialiased;
-  width: 100%;
+@layer base {
+  html { 
+    scroll-behavior: smooth; 
+    overflow-x: hidden; 
+    width: 100%; 
+  }
+
+  body {
+    background-color: var(--color-heritage-paper);
+    color: var(--color-heritage-charcoal);
+    font-family: var(--font-manrope);
+    -webkit-font-smoothing: antialiased;
+    width: 100%;
+  }
+
+  /* --- STRICT NO-CAPS POLICY --- */
+  h1, h2, h3, h4, h5, h6, button, a, span, p, div {
+    text-transform: none !important; 
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-cinzel);
+    font-weight: 600;
+    color: var(--color-heritage-charcoal);
+    letter-spacing: -0.02em; 
+  }
+
+  /* Buttons */
+  button {
+    font-family: var(--font-cinzel); 
+    font-weight: 600; 
+    border-radius: 4px; /* Sharp & Clean */
+  }
 }
 
-/* TYPOGRAPHY REBRAND */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-cormorant);
-  font-weight: 400; /* Tenor Sans doesn't need bold to look strong */
-  color: var(--color-heritage-charcoal);
-  letter-spacing: 0.05em; /* Wide spacing = Luxury */
-  text-transform: uppercase; /* Force uppercase for headlines like Japam */
-}
-
-/* BUTTONS REBRAND */
-button {
-  font-family: var(--font-montserrat);
-  letter-spacing: 0.2em; /* Extremely wide spacing */
-  text-transform: uppercase;
-  font-weight: 700;
-  font-size: 0.65rem; /* Smaller, sharper buttons */
-  border-radius: 0px; /* Sharp corners = Modern */
-}
-
-/* HIDE SCROLLBAR */
+/* Utilities */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
