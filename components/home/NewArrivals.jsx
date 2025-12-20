@@ -1,96 +1,76 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useProducts } from '@/context/ProductContext';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ProductCard } from '@/components/shop/ProductCard'; 
+import React from 'react';
+import { ProductCard } from '../shop/ProductCard';
 
+// Mock Data - "Japam" Style High-End Products
+const newArrivals = [
+  {
+    id: 1,
+    name: '5 Mukhi Rudraksha Mala',
+    price: 1250,
+    originalPrice: 2500,
+    images: [
+        'https://images.unsplash.com/photo-1603038930495-2c26279f6764?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1623151834261-24874f676239?auto=format&fit=crop&q=80&w=600'
+    ],
+    rating: 4.9,
+    reviews: 128
+  },
+  {
+    id: 2,
+    name: 'Amethyst Healing Bracelet',
+    price: 850,
+    originalPrice: 1500,
+    images: [
+        'https://images.unsplash.com/photo-1590424600100-3486df5b9745?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1610189012906-47833d772097?auto=format&fit=crop&q=80&w=600'
+    ],
+    rating: 4.8,
+    reviews: 95
+  },
+  {
+    id: 3,
+    name: 'Shri Yantra (Pure Copper)',
+    price: 3500,
+    originalPrice: 4200,
+    images: [
+        'https://images.unsplash.com/photo-1623151834261-24874f676239?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1603038930495-2c26279f6764?auto=format&fit=crop&q=80&w=600'
+    ],
+    rating: 5.0,
+    reviews: 42
+  },
+  {
+    id: 4,
+    name: '7 Chakra Stone Set',
+    price: 999,
+    originalPrice: 1999,
+    images: [
+        'https://images.unsplash.com/photo-1610189012906-47833d772097?auto=format&fit=crop&q=80&w=600',
+        'https://images.unsplash.com/photo-1567113300190-484852086433?auto=format&fit=crop&q=80&w=600'
+    ],
+    rating: 4.7,
+    reviews: 156
+  }
+];
+
+// NOTE: Using 'export const' to match the named import in HomePage.jsx
 export const NewArrivals = () => {
-  const { fetchProducts } = useProducts();
-  const navigate = useNavigate();
-  const scrollRef = useRef(null);
-  
-  const [products, setProducts] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Japam Style Tabs
-  const categories = ["All", "Rudraksha", "Gemstones", "Yantras", "Malas"];
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const { data } = await fetchProducts({ sortOption: 'newest', batchSize: 10 });
-        setProducts(data || []);
-      } catch (e) {
-        console.error("Failed to load", e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadData();
-  }, [fetchProducts]);
-
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const { current } = scrollRef;
-      const scrollAmount = direction === 'left' ? -300 : 300;
-      current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
-
   return (
-    <section className="py-16 md:py-24 bg-white border-b border-gray-100">
-      <div className="container mx-auto px-4 md:px-8">
-        
-        {/* Header */}
-        <div className="text-center mb-12">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 block mb-3">
-             New Collection
-          </span>
-          <h2 className="font-cormorant text-3xl md:text-5xl text-heritage-charcoal mb-8">
+    <section className="py-16 px-4 bg-heritage-paper">
+      <div className="max-w-7xl mx-auto">
+        {/* Minimal Header */}
+        <div className="text-center mb-10 animate-fade-up">
+          <h2 className="font-cinzel text-3xl font-bold text-heritage-charcoal mb-2">
             New Arrivals
           </h2>
-          
-          {/* Tabs */}
-          <div className="flex justify-center flex-wrap gap-6 md:gap-10 border-b border-gray-100 pb-1">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`pb-4 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative ${
-                  activeCategory === cat 
-                    ? 'text-heritage-charcoal after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-heritage-charcoal' 
-                    : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+          <div className="w-16 h-0.5 bg-heritage-rudraksha mx-auto rounded-full opacity-50"></div>
         </div>
 
-        {/* Slider */}
-        <div className="relative group">
-            <div 
-              ref={scrollRef}
-              className="flex gap-4 md:gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide"
-            >
-              {isLoading ? (
-                [1,2,3,4].map(i => <div key={i} className="min-w-[45%] md:min-w-[22%] aspect-[3/4] bg-gray-50 animate-pulse"/>)
-              ) : (
-                products.map(product => (
-                  <div key={product.id} className="min-w-[45%] md:min-w-[22%] snap-start">
-                    {/* CRITICAL FIX: Prop name is 'product' */}
-                    <ProductCard product={product} /> 
-                  </div>
-                ))
-              )}
-            </div>
-            
-            {/* Mobile Swipe Hint */}
-            <div className="md:hidden text-center text-[10px] text-gray-400 mt-4 uppercase tracking-widest animate-pulse">
-              Swipe to explore
-            </div>
+        {/* Product Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 animate-fade-up" style={{animationDelay: '0.1s'}}>
+          {newArrivals.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
         </div>
       </div>
     </section>

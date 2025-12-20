@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider,
+  sendPasswordResetEmail
+} from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase'; // Direct import
 import { useAuth } from '../hooks/useAuth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -14,11 +23,11 @@ const loginSchema = z.object({
 export default function LoginPage() {
   const [mode, setMode] = useState('login');
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, login, signup } = useAuth();
+  const { user } = useAuth(); // We only need 'user' from context
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: zodResolver(loginSchema)
@@ -31,91 +40,138 @@ export default function LoginPage() {
     }
   }, [user, navigate, location]);
 
-  const onSubmit = async (data) => {
-    setLoading(true);
-    setError(null);
+  // --- THE FIX: Create User in Firestore ---
+  const ensureUserProfile = async (firebaseUser) => {
+    if (!firebaseUser) return;
+    
+    const userRef = doc(db, 'users', firebaseUser.uid);
     try {
-      if (mode === 'login') await login(data.email, data.password);
-      else await signup(data.email, data.password);
-    } catch (err) {
-      setError("Invalid credentials or account already exists.");
-    } finally {
-      setLoading(false);
+      const docSnap = await getDoc(userRef);
+      
+      if (!docSnap.exists()) {
+        await setDoc(userRef, {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || 'Devotee',
+          role: 'user', // Default role. Change to 'admin' manually in Firebase Console.
+          favorites: [],
+          cart: [],
+          createdAt: serverTimestamp()
+        });
+        console.log("User profile created in DB!");
+      }
+    } catch (e) {
+      console.error("Error creating user profile:", e);
     }
   };
 
+  const onSubmit = async (data) => {
+    setAuthLoading(true);
+    setError(null);
+    try {
+      let result;
+      if (mode === 'login') {
+        result = await signInWithEmailAndPassword(auth, data.email, data.password);
+      } else {
+        result = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      }
+      
+      // Force Database Creation
+      await ensureUserProfile(result.user);
+      
+    } catch (err) {
+      console.error(err);
+      let msg = "Authentication failed.";
+      if (err.message.includes("invalid-credential")) msg = "Incorrect email or password.";
+      if (err.message.includes("email-already-in-use")) msg = "Email already in use.";
+      setError(msg);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setAuthLoading(true);
+    setError(null);
+    try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        // Force Database Creation
+        await ensureUserProfile(result.user);
+    } catch (err) {
+        console.error(err);
+        setError("Google login failed.");
+    } finally {
+        setAuthLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-heritage-paper flex pt-20">
-      
-      {/* Left Side: Visual/Brand */}
-      <div className="hidden lg:flex w-1/2 bg-heritage-charcoal relative items-center justify-center overflow-hidden">
+      {/* Visual Side */}
+      <div className="hidden lg:flex w-1/2 bg-heritage-rudraksha relative items-center justify-center overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
-        <img 
-          src="https://images.unsplash.com/photo-1621262657790-23a54728551f?q=80&w=1200&auto=format&fit=crop" 
-          alt="Kashi Rituals"
-          className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay"
-        />
-        <div className="relative z-10 text-center text-heritage-paper p-12 max-w-lg">
-          <h2 className="font-cormorant text-5xl mb-6">Join the Sankalp</h2>
-          <p className="font-montserrat text-sm leading-7 tracking-wide text-heritage-sand/80">
-            "Unlock exclusive access to live darshans, track your spiritual journey, and curate your personal altar with authentic artifacts."
+        <div className="relative z-10 text-center text-white p-12 max-w-lg">
+          <h2 className="font-cinzel text-4xl font-bold mb-6">Join the Sankalp</h2>
+          <p className="font-manrope text-base leading-7 text-white/90">
+            "Unlock exclusive access to live darshans, track your spiritual journey."
           </p>
         </div>
       </div>
 
-      {/* Right Side: Form */}
+      {/* Form Side */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-24 bg-white">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:text-left">
-            <h1 className="font-cormorant text-4xl text-heritage-charcoal mb-2">
-              {mode === 'login' ? 'Welcome Back' : 'Begin Your Journey'}
+            <h1 className="font-cinzel text-3xl font-bold text-heritage-charcoal mb-2">
+              {mode === 'login' ? 'Welcome back' : 'Begin your journey'}
             </h1>
-            <p className="text-xs uppercase tracking-widest text-heritage-grey">
+            <p className="text-sm text-heritage-grey">
               {mode === 'login' ? 'Sign in to access your account' : 'Create an account to get started'}
             </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 flex items-center gap-3 text-red-700 text-sm">
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 flex items-center gap-3 text-red-700 text-sm rounded-r-md">
               <AlertCircle size={18} /> {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-1">
-              <label className="text-[10px] uppercase tracking-widest font-bold text-heritage-grey">Email</label>
-              <input {...register("email")} className="w-full border-b border-heritage-border py-3 text-sm focus:border-heritage-gold outline-none transition-colors" placeholder="name@example.com" />
-              {errors.email && <p className="text-red-500 text-[10px]">{errors.email.message}</p>}
+              <label className="text-sm font-bold text-heritage-charcoal">Email</label>
+              <input {...register("email")} className="w-full border border-heritage-mist rounded-md px-4 py-3 text-sm focus:border-heritage-rudraksha outline-none" placeholder="name@example.com" />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-1">
               <div className="flex justify-between">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-heritage-grey">Password</label>
-                {mode === 'login' && <button type="button" className="text-[10px] text-heritage-gold hover:underline">Forgot Password?</button>}
+                <label className="text-sm font-bold text-heritage-charcoal">Password</label>
+                {mode === 'login' && <button type="button" className="text-xs text-heritage-rudraksha font-semibold hover:underline">Forgot password?</button>}
               </div>
-              <input type="password" {...register("password")} className="w-full border-b border-heritage-border py-3 text-sm focus:border-heritage-gold outline-none transition-colors" placeholder="••••••••" />
-              {errors.password && <p className="text-red-500 text-[10px]">{errors.password.message}</p>}
+              <input type="password" {...register("password")} className="w-full border border-heritage-mist rounded-md px-4 py-3 text-sm focus:border-heritage-rudraksha outline-none" placeholder="••••••••" />
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
             </div>
 
-            <button type="submit" disabled={loading} className="w-full bg-heritage-charcoal text-white py-4 text-xs font-bold uppercase tracking-[0.2em] hover:bg-heritage-gold transition-all flex justify-center gap-2">
-              {loading ? <Loader2 className="animate-spin w-4 h-4" /> : (mode === 'login' ? 'Sign In' : 'Create Account')}
+            <button type="submit" disabled={authLoading} className="w-full bg-heritage-charcoal text-white py-3.5 text-sm font-bold rounded-md hover:bg-heritage-rudraksha transition-all flex justify-center gap-2 shadow-md">
+              {authLoading ? <Loader2 className="animate-spin w-4 h-4" /> : (mode === 'login' ? 'Sign in' : 'Create account')}
             </button>
           </form>
 
           <div className="relative flex py-2 items-center">
-            <div className="flex-grow border-t border-heritage-border"></div>
-            <span className="flex-shrink-0 mx-4 text-[10px] text-heritage-grey/50 uppercase tracking-widest">Or</span>
-            <div className="flex-grow border-t border-heritage-border"></div>
+            <div className="flex-grow border-t border-heritage-mist"></div>
+            <span className="flex-shrink-0 mx-4 text-xs text-heritage-grey">Or</span>
+            <div className="flex-grow border-t border-heritage-mist"></div>
           </div>
 
-          <button className="w-full border border-heritage-border text-heritage-charcoal py-3 text-xs font-bold uppercase tracking-widest hover:border-heritage-gold transition-colors flex items-center justify-center gap-2">
-            <span className="font-serif italic text-lg">G</span> Continue with Google
+          <button onClick={handleGoogleLogin} type="button" className="w-full border border-heritage-mist rounded-md text-heritage-charcoal py-3 text-sm font-bold hover:border-heritage-rudraksha hover:bg-heritage-sand transition-colors flex items-center justify-center gap-2">
+            <span className="font-serif italic text-lg text-heritage-rudraksha">G</span> Continue with Google
           </button>
 
-          <p className="text-center text-xs text-heritage-grey mt-8">
+          <p className="text-center text-sm text-heritage-grey mt-8">
             {mode === 'login' ? "New here? " : "Already have an account? "}
-            <button onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); reset(); setError(null); }} className="text-heritage-gold font-bold underline underline-offset-4">
-              {mode === 'login' ? "Create Account" : "Sign In"}
+            <button onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); reset(); setError(null); }} className="text-heritage-rudraksha font-bold hover:underline">
+              {mode === 'login' ? "Create account" : "Sign in"}
             </button>
           </p>
         </div>

@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.jsx';
-import './index.css';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from './context/ThemeContext';
+import App from './App';
+import './index.css';
+
+// FIX: Import AuthProvider from HOOKS, not context
+import { AuthProvider } from './hooks/useAuth'; 
 import { CartProvider } from './context/CartContext';
 import { ProductProvider } from './context/ProductContext';
 import { LoginModalProvider } from './context/LoginModalContext';
@@ -11,15 +13,15 @@ import { LoginModalProvider } from './context/LoginModalContext';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <ThemeProvider>
+      <AuthProvider>
         <ProductProvider>
-          <CartProvider>
-            <LoginModalProvider>
+          <LoginModalProvider>
+            <CartProvider>
               <App />
-            </LoginModalProvider>
-          </CartProvider>
+            </CartProvider>
+          </LoginModalProvider>
         </ProductProvider>
-      </ThemeProvider>
+      </AuthProvider>
     </BrowserRouter>
-  </React.StrictMode>,
+  </React.StrictMode>
 );
