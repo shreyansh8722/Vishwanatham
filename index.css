@@ -1,133 +1,70 @@
-/* --- 1. FONTS: Heritage (Playfair Display) & Modern (Lato) - No Italics --- */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700;900&display=swap');
+/* --- NEW BRANDING: NEO-VEDIC LUXURY --- */
+/* Tenor Sans for that "High-End Magazine" look */
+/* Manrope for that "Modern Tech/App" feel */
+@import url('https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Manrope:wght@300;400;500;600;700&display=swap');
 
 @import "tailwindcss"; 
 
 @theme {
-  /* --- VISHWANATHAM HERITAGE PALETTE --- */
+  /* --- NEW PALETTE: "The Divine Modern" --- */
   
   /* Backgrounds */
-  --color-heritage-paper: #FDFBF7;    /* Cream / Off-White (Base) */
-  --color-heritage-sand: #FAF5EF;     /* Warmer Sand (Secondary) */
-  --color-heritage-mist: #F3EFE6;     /* Subtle Mist */
+  --color-heritage-paper: #FFFFFF;      /* PURE STARK WHITE (No more cream) */
+  --color-heritage-sand: #F8F8F8;       /* Ice Grey (Very subtle) */
+  --color-heritage-mist: #F3F3F3;       /* Light Grey for hovers */
   
-  /* Typography & Lines */
-  --color-heritage-charcoal: #4A1811; /* Mahogany Brown (Headings, Navbar, Footer) */
-  --color-heritage-grey: #333333;     /* Dark Grey (Body Text - Readable) */
-  --color-heritage-border: #E5E5E5;   /* Crisp Light Grey (Subtle Borders) */
+  /* Typography & Icons */
+  --color-heritage-charcoal: #000000;   /* JET BLACK (No more brown) */
+  --color-heritage-grey: #666666;       /* Neutral Grey */
+  --color-heritage-border: #E5E5E5;     /* Clean borders */
   
-  /* Accents */
-  --color-heritage-gold: #D4Af37;     /* Divine Gold (Buttons, Icons) */
-  --color-heritage-clay: #C5A02F;     /* Darker Gold (Hover States) */
-  --color-heritage-saffron: #E87E35;  /* Muted Saffron (Highlights/Sales) */
+  /* Luxury Accents */
+  --color-heritage-gold: #C8AA6E;       /* CHAMPAGNE GOLD (More expensive looking than yellow gold) */
+  --color-heritage-clay: #B09259;       /* Darker Champagne */
+  --color-heritage-saffron: #000000;    /* We use Black for "Add to Cart" now (More luxury) */
 
-  /* MAPPING */
-  --color-brand-primary: var(--color-heritage-gold);
-  --color-brand-primaryDark: var(--color-heritage-charcoal);
-  --color-brand-secondary: var(--color-heritage-saffron);
-  --color-brand-dark: var(--color-heritage-charcoal);
-  --color-brand-paper: var(--color-heritage-paper);
-  --color-brand-gray: var(--color-heritage-grey);
+  /* --- NEW FONTS --- */
+  /* We remap the old variable names to the NEW fonts so you don't have to change every file */
+  --font-cormorant: "Tenor Sans", sans-serif;    /* The "Vogue" look */
+  --font-montserrat: "Manrope", sans-serif;      /* The "App" look */
 
-  /* --- TYPOGRAPHY --- */
-  --font-cormorant: "Playfair Display", serif; /* Heritage Headings */
-  --font-montserrat: "Lato", sans-serif;       /* Clean Body Text */
-  --font-display: "Playfair Display", serif;
-  
-  /* --- SPACING --- */
-  --tracking-tightest: -0.01em;
-  --tracking-wide: 0.02em;
-  --tracking-lux: 0.05em;     
-  --tracking-widest: 0.15em;   
-
-  /* --- ANIMATIONS --- */
-  --animate-fade-in: fadeIn 0.6s ease-out forwards;
-  --animate-slide-up: slideUp 0.6s ease-out forwards;
-  --animate-fade-in-up: fadeInUp 0.6s ease-out forwards;
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  /* ANIMATIONS */
+  --animate-fade-up: fadeUp 0.8s ease-out forwards;
+  @keyframes fadeUp { 
+    from { opacity: 0; transform: translateY(20px); } 
+    to { opacity: 1; transform: translateY(0); } 
   }
 }
 
-/* Base Styles applied directly */
-html { 
-  scroll-behavior: smooth; 
-  overflow-x: hidden;
-  width: 100%;
-}
-
+/* GLOBAL RESETS */
+html { scroll-behavior: smooth; overflow-x: hidden; width: 100%; }
 body {
   background-color: var(--color-heritage-paper);
-  color: var(--color-heritage-grey);
+  color: var(--color-heritage-charcoal);
   font-family: var(--font-montserrat);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-  position: relative;
   width: 100%;
-  line-height: 1.6;
 }
 
-/* Headings: Playfair Display in Mahogany - Normal Style */
+/* TYPOGRAPHY REBRAND */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-cormorant);
-  font-weight: 700;
+  font-weight: 400; /* Tenor Sans doesn't need bold to look strong */
   color: var(--color-heritage-charcoal);
-  letter-spacing: normal;
-  font-style: normal; /* Ensure no italics */
+  letter-spacing: 0.05em; /* Wide spacing = Luxury */
+  text-transform: uppercase; /* Force uppercase for headlines like Japam */
 }
 
-/* Buttons: Divine Gold */
+/* BUTTONS REBRAND */
 button {
-  letter-spacing: var(--tracking-wide);
+  font-family: var(--font-montserrat);
+  letter-spacing: 0.2em; /* Extremely wide spacing */
   text-transform: uppercase;
   font-weight: 700;
-  font-size: 0.85rem;
-  transition: all 0.3s ease;
+  font-size: 0.65rem; /* Smaller, sharper buttons */
+  border-radius: 0px; /* Sharp corners = Modern */
 }
 
-/* Utilities */
-.dropdown-content {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(10px) translateX(-50%);
-  transition: all 0.3s ease-in-out;
-}
-
-.group:hover .dropdown-content {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0) translateX(-50%);
-}
-
+/* HIDE SCROLLBAR */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #FAF5EF;
-}
-::-webkit-scrollbar-thumb {
-  background: #D4Af37; /* Gold Scrollbar */
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #C5A02F;
-}

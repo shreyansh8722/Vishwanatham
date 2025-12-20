@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Truck, ShieldCheck, Share2, Heart, Minus, Plus } from 'lucide-react';
+import { Star, Truck, ShieldCheck, Heart, Minus, Plus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../hooks/useFavorites';
-// Mock Data import - replace with context or API in real app
-import { useProductContext } from '../context/ProductContext'; // Assuming you have this or use local data
+// FIX: Changed useProductContext to useProducts
+import { useProducts } from '../context/ProductContext';
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
-  // Simplified product fetching for demo - normally useProductContext
-  // For now, mocking a single product if context isn't fully wired for ID lookup
-  const product = {
-    id: parseInt(id),
+  
+  // Use real data from context
+  const { products } = useProducts();
+  
+  // Find product by ID from context, or fall back to a mock if not found (optional)
+  const productFound = products.find(p => p.id === parseInt(id));
+  
+  // Fallback mock product (if ID doesn't exist in the context list yet)
+  const defaultProduct = {
+    id: parseInt(id) || 1,
     name: "Divine Rudraksha Mala",
     price: 1500,
     description: "Authentic 5-mukhi Rudraksha mala sourced directly from Kashi. Perfect for daily mantra chanting (Japa) and wearing for spiritual protection.",
@@ -25,9 +31,14 @@ const ProductDetailsPage = () => {
     inStock: true
   };
 
-  const [selectedImage, setSelectedImage] = useState(product.images[0]);
+  const product = productFound || defaultProduct;
+
+  const [selectedImage, setSelectedImage] = useState(product.images ? product.images[0] : product.image);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+
+  // Handle case where images might be just a single string in old data
+  const galleryImages = Array.isArray(product.images) ? product.images : [product.image];
 
   const isLiked = isFavorite(product.id);
 
@@ -48,8 +59,9 @@ const ProductDetailsPage = () => {
         <div className="flex flex-col lg:flex-row gap-12 mb-20">
           {/* Gallery */}
           <div className="w-full lg:w-1/2 flex flex-col-reverse md:flex-row gap-4">
+            {/* Thumbnails */}
             <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-y-auto md:w-24 md:h-[600px] scrollbar-hide">
-              {product.images.map((img, idx) => (
+              {galleryImages.map((img, idx) => (
                 <img 
                   key={idx}
                   src={img}
@@ -59,6 +71,7 @@ const ProductDetailsPage = () => {
                 />
               ))}
             </div>
+            {/* Main Image */}
             <div className="flex-1 h-[500px] md:h-[600px] bg-stone-50 overflow-hidden">
               <img src={selectedImage} alt={product.name} className="w-full h-full object-cover" />
             </div>

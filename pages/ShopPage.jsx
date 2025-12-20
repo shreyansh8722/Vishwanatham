@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-// Navbar and Footer removed to prevent duplication
 import { ProductCard } from '@/components/shop/ProductCard';
 import FilterSidebar from '@/components/shop/FilterSidebar';
-import { useProductContext } from '@/context/ProductContext';
+// FIX: Changed useProductContext to useProducts
+import { useProducts } from '@/context/ProductContext';
 import { SlidersHorizontal, ChevronDown } from 'lucide-react';
 import QuickViewModal from '@/components/shop/QuickViewModal';
 
 const ShopPage = () => {
-  const { products } = useProductContext();
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  // FIX: Destructure from useProducts()
+  const { products } = useProducts();
+  const [filteredProducts, setFilteredProducts] = useState(products || []);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [sortBy, setSortBy] = useState('featured');
@@ -19,10 +20,9 @@ const ShopPage = () => {
   const categoryParam = queryParams.get('category');
   const searchParam = queryParams.get('search');
 
-  // Helper to format category names nicely (e.g., "Rudraksha" -> "Rudraksha Beads" or just title case)
+  // Helper to format category names nicely
   const getPageTitle = () => {
     if (categoryParam) {
-      // Manual mapping for specific categories if needed, or just display the category
       const catLower = categoryParam.toLowerCase();
       if (catLower === 'rudraksha') return 'Rudraksha Beads';
       if (catLower === 'gemstones') return 'Sacred Gemstones';
@@ -35,11 +35,12 @@ const ShopPage = () => {
   };
 
   useEffect(() => {
-    let result = [...products];
+    // Ensure products is an array before filtering
+    let result = Array.isArray(products) ? [...products] : [];
 
     if (categoryParam) {
       result = result.filter(p => 
-        p.category.toLowerCase() === categoryParam.toLowerCase() ||
+        p.category?.toLowerCase() === categoryParam.toLowerCase() ||
         (p.tags && p.tags.some(tag => tag.toLowerCase() === categoryParam.toLowerCase()))
       );
     }
@@ -47,9 +48,9 @@ const ShopPage = () => {
     if (searchParam) {
       const q = searchParam.toLowerCase();
       result = result.filter(p => 
-        p.name.toLowerCase().includes(q) || 
+        p.name?.toLowerCase().includes(q) || 
         p.description?.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
+        p.category?.toLowerCase().includes(q)
       );
     }
 

@@ -1,65 +1,88 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import BrandLogo from './BrandLogo';
+import BrandLogo from './BrandLogo'; // Ensure this path is correct
+import { CheckCircle2, Zap, Truck, ShieldCheck } from 'lucide-react';
 
 export const Footer = () => {
   return (
-    <footer className="bg-heritage-charcoal text-heritage-paper py-20 border-t-4 border-heritage-gold font-montserrat">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
-          
-          <div className="md:col-span-1">
-            <div className="mb-6">
-              <Link to="/">
-                <BrandLogo lightMode={true} className="items-start" />
-              </Link>
+    <footer className="bg-[#fcfcfc] border-t border-gray-100 font-montserrat pt-12">
+      
+      {/* --- TRUST STRIP (Integrated here as requested) --- */}
+      <div className="container mx-auto px-6 pb-12 border-b border-gray-100">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { icon: CheckCircle2, title: "100% Original", desc: "Lab Certified" },
+            { icon: Zap, title: "Energized", desc: "In Kashi Temple" },
+            { icon: Truck, title: "Express Shipping", desc: "Worldwide Delivery" },
+            { icon: ShieldCheck, title: "Secure Payment", desc: "100% Safe" }
+          ].map((item, idx) => (
+            <div key={idx} className="flex flex-col items-center text-center gap-2">
+              <item.icon className="w-6 h-6 text-heritage-gold" strokeWidth={1.5} />
+              <h4 className="font-cormorant text-lg text-heritage-charcoal">{item.title}</h4>
+              <p className="text-[10px] uppercase tracking-wider text-gray-400">{item.desc}</p>
             </div>
-            <p className="font-montserrat text-sm font-light leading-7 text-heritage-paper/80">
-              Vishwanatham is a bridge to the ancient spiritual heritage of Varanasi, curated for the modern seeker. Handcrafted with devotion.
+          ))}
+        </div>
+      </div>
+
+      {/* --- MAIN FOOTER CONTENT --- */}
+      <div className="container mx-auto px-6 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          
+          {/* Brand & Bio */}
+          <div className="md:col-span-1 space-y-6">
+            <Link to="/">
+              <BrandLogo className="text-heritage-charcoal scale-90 origin-left" />
+            </Link>
+            <p className="text-xs leading-6 text-gray-500 font-light">
+              Connecting you to the spiritual heritage of Varanasi. Authentic Rudraksha, Gemstones, and ancient wisdom for the modern seeker.
             </p>
           </div>
           
+          {/* Links */}
           <div>
-            <h4 className="font-cormorant text-2xl text-heritage-gold mb-6 italic">Shop</h4>
-            <ul className="space-y-4 text-sm tracking-wider uppercase text-heritage-paper/90">
+            <h4 className="font-cormorant text-lg mb-6">Shop</h4>
+            <ul className="space-y-3 text-xs uppercase tracking-widest text-gray-500">
               <li><Link to="/shop?category=Rudraksha" className="hover:text-heritage-gold transition-colors">Rudraksha</Link></li>
               <li><Link to="/shop?category=Gemstones" className="hover:text-heritage-gold transition-colors">Gemstones</Link></li>
               <li><Link to="/shop?category=Yantras" className="hover:text-heritage-gold transition-colors">Yantras</Link></li>
-              <li><Link to="/shop?category=Incense" className="hover:text-heritage-gold transition-colors">Incense</Link></li>
+              <li><Link to="/shop?category=Malas" className="hover:text-heritage-gold transition-colors">Japa Malas</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-cormorant text-2xl text-heritage-gold mb-6 italic">Company</h4>
-            <ul className="space-y-4 text-sm tracking-wider uppercase text-heritage-paper/90">
-              <li><Link to="/about" className="hover:text-heritage-gold transition-colors">About Us</Link></li>
-              <li><Link to="/contact" className="hover:text-heritage-gold transition-colors">Contact</Link></li>
+            <h4 className="font-cormorant text-lg mb-6">Support</h4>
+            <ul className="space-y-3 text-xs uppercase tracking-widest text-gray-500">
+              <li><Link to="/about" className="hover:text-heritage-gold transition-colors">Our Story</Link></li>
+              <li><Link to="/contact" className="hover:text-heritage-gold transition-colors">Contact Us</Link></li>
               <li><Link to="/shipping" className="hover:text-heritage-gold transition-colors">Shipping Policy</Link></li>
-              <li><Link to="/returns" className="hover:text-heritage-gold transition-colors">Returns</Link></li>
+              <li><Link to="/returns" className="hover:text-heritage-gold transition-colors">Returns & Refunds</Link></li>
             </ul>
           </div>
 
+          {/* Newsletter */}
           <div>
-            <h4 className="font-cormorant text-2xl text-heritage-gold mb-6 italic">Newsletter</h4>
-            <p className="text-sm font-light mb-4 text-heritage-paper/80">Receive spiritual insights and exclusive offers.</p>
-            <div className="flex border-b border-heritage-gold/50 pb-2">
+            <h4 className="font-cormorant text-lg mb-6">Newsletter</h4>
+            <p className="text-xs text-gray-500 mb-4 font-light">Join our community for spiritual insights.</p>
+            <div className="flex border-b border-gray-300 pb-2">
               <input 
                 type="email" 
-                placeholder="EMAIL ADDRESS" 
-                className="bg-transparent border-none outline-none text-sm w-full text-heritage-paper placeholder-heritage-paper/40 uppercase tracking-wider focus:ring-0"
+                placeholder="YOUR EMAIL" 
+                className="bg-transparent border-none outline-none text-xs w-full placeholder-gray-400 uppercase tracking-wider"
               />
-              <button className="text-sm uppercase tracking-widest text-heritage-gold hover:text-white transition-colors font-bold">Join</button>
+              <button className="text-xs uppercase font-bold text-heritage-charcoal hover:text-heritage-gold">Join</button>
             </div>
           </div>
         </div>
         
-        <div className="flex flex-col md:flex-row justify-between items-center border-t border-heritage-paper/10 pt-10 gap-4">
-          <p className="text-[11px] uppercase tracking-widest text-heritage-paper/60">
-            © 2025 Vishwanatham Ecosystem.
+        {/* Copyright */}
+        <div className="flex flex-col md:flex-row justify-between items-center border-t border-gray-100 pt-10 mt-16 gap-4">
+          <p className="text-[10px] uppercase tracking-widest text-gray-400">
+            © 2025 Vishwanatham. All Rights Reserved.
           </p>
-          <div className="flex gap-6 text-[11px] uppercase tracking-widest text-heritage-paper/60">
-             <Link to="/privacy" className="hover:text-heritage-gold">Privacy</Link>
-             <Link to="/terms" className="hover:text-heritage-gold">Terms</Link>
+          <div className="flex gap-6 text-[10px] uppercase tracking-widest text-gray-400">
+             <Link to="/privacy" className="hover:text-heritage-charcoal">Privacy</Link>
+             <Link to="/terms" className="hover:text-heritage-charcoal">Terms</Link>
           </div>
         </div>
       </div>

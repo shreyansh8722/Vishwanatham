@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/context/ProductContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-// IMPORT YOUR CUSTOM CARD
 import { ProductCard } from '@/components/shop/ProductCard'; 
 
 export const NewArrivals = () => {
@@ -12,20 +10,19 @@ export const NewArrivals = () => {
   const scrollRef = useRef(null);
   
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
 
-  const categories = ["All", "Sarees", "Lehengas", "Suits", "Dupattas"];
+  // Japam Style Tabs
+  const categories = ["All", "Rudraksha", "Gemstones", "Yantras", "Malas"];
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { data } = await fetchProducts({ sortOption: 'newest', batchSize: 20 });
+        const { data } = await fetchProducts({ sortOption: 'newest', batchSize: 10 });
         setProducts(data || []);
-        setFilteredProducts(data || []);
       } catch (e) {
-        console.error("Failed to load new arrivals", e);
+        console.error("Failed to load", e);
       } finally {
         setIsLoading(false);
       }
@@ -33,21 +30,6 @@ export const NewArrivals = () => {
     loadData();
   }, [fetchProducts]);
 
-  // Tab Filtering
-  useEffect(() => {
-    if (activeCategory === 'All') {
-      setFilteredProducts(products);
-    } else {
-      const lowerCat = activeCategory.toLowerCase().slice(0, -1);
-      const filtered = products.filter(p => 
-        p.category?.toLowerCase().includes(lowerCat) || 
-        p.name?.toLowerCase().includes(lowerCat)
-      );
-      setFilteredProducts(filtered);
-    }
-  }, [activeCategory, products]);
-
-  // Slider Logic
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { current } = scrollRef;
@@ -57,27 +39,28 @@ export const NewArrivals = () => {
   };
 
   return (
-    <section className="py-20 bg-white relative overflow-hidden">
-      <div className="max-w-[1800px] mx-auto px-12">
+    <section className="py-16 md:py-24 bg-white border-b border-gray-100">
+      <div className="container mx-auto px-4 md:px-8">
         
-        {/* 1. HEADER & TABS */}
-        <div className="text-center mb-16 space-y-6">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#B08D55] block">
-             Just Arrived
+        {/* Header */}
+        <div className="text-center mb-12">
+          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 block mb-3">
+             New Collection
           </span>
-          <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a] uppercase tracking-widest">
-            Fresh From The Loom
+          <h2 className="font-cormorant text-3xl md:text-5xl text-heritage-charcoal mb-8">
+            New Arrivals
           </h2>
           
-          <div className="flex justify-center flex-wrap gap-8 text-[11px] font-bold tracking-[0.2em] uppercase text-gray-400">
+          {/* Tabs */}
+          <div className="flex justify-center flex-wrap gap-6 md:gap-10 border-b border-gray-100 pb-1">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`pb-2 border-b-2 transition-all duration-300 ${
+                className={`pb-4 text-[11px] font-bold uppercase tracking-[0.2em] transition-all relative ${
                   activeCategory === cat 
-                    ? 'text-black border-black' 
-                    : 'border-transparent hover:text-gray-600'
+                    ? 'text-heritage-charcoal after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-heritage-charcoal' 
+                    : 'text-gray-400 hover:text-gray-600'
                 }`}
               >
                 {cat}
@@ -86,63 +69,28 @@ export const NewArrivals = () => {
           </div>
         </div>
 
-        {/* 2. SLIDER CONTAINER */}
-        <div className="relative group px-0 md:px-12">
-            
-            {/* Scroll Area */}
+        {/* Slider */}
+        <div className="relative group">
             <div 
               ref={scrollRef}
-              className="flex gap-4 md:gap-8 overflow-x-auto pb-12 snap-x snap-mandatory scrollbar-hide"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              className="flex gap-4 md:gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide"
             >
               {isLoading ? (
-                // Loading Skeletons
-                [1,2,3,4].map(i => (
-                  <div key={i} className="min-w-[45%] md:min-w-[23%] aspect-[3/4] bg-gray-50 animate-pulse"/>
-                ))
-              ) : filteredProducts.length > 0 ? (
-                filteredProducts.map(product => (
-                  // WRAPPER DIV for Sizing
-                  // Forces the imported ProductCard to fit the slider width (23%)
-                  <div 
-                    key={product.id} 
-                    className="relative min-w-[45%] md:min-w-[23%] flex-shrink-0 snap-start"
-                  >
-                    {/* USE YOUR CUSTOM PRODUCT CARD COMPONENT HERE */}
-                    <ProductCard item={product} />
+                [1,2,3,4].map(i => <div key={i} className="min-w-[45%] md:min-w-[22%] aspect-[3/4] bg-gray-50 animate-pulse"/>)
+              ) : (
+                products.map(product => (
+                  <div key={product.id} className="min-w-[45%] md:min-w-[22%] snap-start">
+                    {/* CRITICAL FIX: Prop name is 'product' */}
+                    <ProductCard product={product} /> 
                   </div>
                 ))
-              ) : (
-                <div className="w-full text-center py-12 text-gray-400 font-serif italic">
-                  No products found.
-                </div>
               )}
             </div>
-
-            {/* 3. VERTICAL BUTTONS (EKAYA STYLE) */}
-            <button 
-                onClick={() => scroll('left')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 hidden xl:flex flex-col items-center gap-6 text-gray-300 hover:text-black transition-colors z-20 h-full justify-center w-12"
-            >
-                <span className="text-[9px] font-bold uppercase tracking-[0.3em] writing-vertical-rl rotate-180">
-                    Previous
-                </span>
-            </button>
-
-            <button 
-                onClick={() => scroll('right')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 hidden xl:flex flex-col items-center gap-6 text-gray-300 hover:text-black transition-colors z-20 h-full justify-center w-12"
-            >
-                <span className="text-[9px] font-bold uppercase tracking-[0.3em] writing-vertical-rl">
-                    Next
-                </span>
-            </button>
-
-             {/* Mobile Arrows fallback */}
-             <div className="flex xl:hidden justify-center gap-4 -mt-4 mb-8">
-                <button onClick={() => scroll('left')} className="p-3 border border-gray-200 rounded-full hover:border-black transition-colors"><ChevronLeft size={16}/></button>
-                <button onClick={() => scroll('right')} className="p-3 border border-gray-200 rounded-full hover:border-black transition-colors"><ChevronRight size={16}/></button>
-             </div>
+            
+            {/* Mobile Swipe Hint */}
+            <div className="md:hidden text-center text-[10px] text-gray-400 mt-4 uppercase tracking-widest animate-pulse">
+              Swipe to explore
+            </div>
         </div>
       </div>
     </section>
