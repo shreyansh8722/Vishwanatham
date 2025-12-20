@@ -1,122 +1,76 @@
 import React, { useState } from 'react';
-import { Navbar } from '@/components/common/Navbar';
-import { Footer } from '@/components/common/Footer';
-import { db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { Search, Package, AlertCircle, Check } from 'lucide-react';
+import { SEO } from '../components/SEO';
+import { Package, Truck, CheckCircle, Clock } from 'lucide-react';
 
-const OrderTimeline = ({ status }) => {
-  const steps = ['Pending', 'Shipped', 'Delivered'];
-  const currentStep = steps.indexOf(status);
-  
-  if (status === 'Cancelled') return <div className="text-red-500 font-bold text-center mt-6 bg-red-50 p-3 rounded">This order has been cancelled.</div>;
+const TrackOrderPage = () => {
+  const [orderId, setOrderId] = useState('');
+  const [status, setStatus] = useState(null); // 'processing', 'shipped', 'delivered'
+
+  const handleTrack = (e) => {
+    e.preventDefault();
+    // Simulate tracking logic
+    setTimeout(() => setStatus('shipped'), 1000);
+  };
 
   return (
-    <div className="mt-8 relative">
-      <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2"></div>
-      <div className="absolute top-1/2 left-0 h-1 bg-green-500 -z-10 -translate-y-1/2 transition-all duration-700" style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}></div>
-      <div className="flex justify-between">
-        {steps.map((step, idx) => {
-          const isCompleted = idx <= currentStep;
-          return (
-            <div key={step} className="flex flex-col items-center bg-white px-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-300'}`}>
-                {isCompleted ? <Check size={16} /> : idx + 1}
+    <div className="bg-heritage-paper min-h-screen pt-24 pb-20">
+      <SEO title="Track Order" />
+      <div className="container mx-auto px-6 max-w-3xl">
+        <h1 className="font-cormorant text-4xl text-heritage-charcoal text-center mb-2">Track Your Blessing</h1>
+        <p className="text-center text-heritage-grey text-sm font-montserrat mb-12">Enter your Order ID to see the status of your sacred package.</p>
+
+        <form onSubmit={handleTrack} className="flex gap-4 mb-16 max-w-md mx-auto">
+          <input 
+            type="text" 
+            value={orderId}
+            onChange={(e) => setOrderId(e.target.value)}
+            placeholder="Order ID (e.g. VISH-1234)" 
+            className="flex-1 p-4 border border-heritage-border bg-white focus:outline-none focus:border-heritage-gold text-heritage-charcoal uppercase tracking-wider text-sm"
+            required
+          />
+          <button className="bg-heritage-gold text-white px-8 py-4 uppercase tracking-widest text-xs font-bold hover:bg-heritage-clay transition-colors">
+            Track
+          </button>
+        </form>
+
+        {status && (
+          <div className="bg-white p-10 rounded-sm shadow-sm border border-heritage-border animate-fade-in-up">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-heritage-mist pb-6">
+              <div>
+                <span className="block text-[10px] uppercase tracking-widest text-heritage-grey">Order Status</span>
+                <span className="font-cormorant text-2xl text-heritage-charcoal">In Transit</span>
               </div>
-              <span className={`text-xs font-bold uppercase mt-2 ${isCompleted ? 'text-green-600' : 'text-gray-400'}`}>{step}</span>
+              <div className="mt-4 md:mt-0 text-right">
+                <span className="block text-[10px] uppercase tracking-widest text-heritage-grey">Estimated Delivery</span>
+                <span className="font-montserrat text-sm font-bold text-heritage-gold">Dec 24, 2025</span>
+              </div>
             </div>
-          );
-        })}
+
+            {/* Timeline */}
+            <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-8 md:gap-0">
+              {/* Line (Desktop) */}
+              <div className="absolute top-5 left-0 w-full h-[2px] bg-heritage-mist hidden md:block -z-10"></div>
+              
+              {/* Steps */}
+              {[
+                { label: "Order Placed", icon: Clock, active: true },
+                { label: "Dispatched", icon: Package, active: true },
+                { label: "In Transit", icon: Truck, active: true, current: true },
+                { label: "Delivered", icon: CheckCircle, active: false }
+              ].map((step, idx) => (
+                <div key={idx} className={`flex md:flex-col items-center gap-4 md:gap-2 bg-white md:bg-transparent pr-4 md:pr-0 ${step.active ? 'opacity-100' : 'opacity-40'}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${step.current ? 'border-heritage-gold bg-heritage-paper text-heritage-gold' : step.active ? 'bg-heritage-gold border-heritage-gold text-white' : 'border-heritage-border bg-white text-heritage-grey'}`}>
+                    <step.icon size={16} />
+                  </div>
+                  <span className="text-xs uppercase tracking-wider font-bold text-heritage-charcoal">{step.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default function TrackOrderPage() {
-  const [orderId, setOrderId] = useState('');
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleTrack = async (e) => {
-    e.preventDefault();
-    if (!orderId) return;
-    setLoading(true);
-    setError('');
-    setOrder(null);
-
-    try {
-      const docRef = doc(db, 'orders', orderId.trim());
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        setOrder({ id: docSnap.id, ...docSnap.data() });
-      } else {
-        setError("Order ID not found. Please check your email for the correct ID.");
-      }
-    } catch (err) {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      <Navbar />
-      <div className="flex-grow flex items-center justify-center py-12 px-4">
-        <div className="w-full max-w-lg">
-           <div className="text-center mb-8">
-              <h1 className="font-serif text-3xl text-gray-900 mb-2">Track Your Order</h1>
-              <p className="text-gray-500">Enter your Order ID to see real-time status.</p>
-           </div>
-
-           <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-              <form onSubmit={handleTrack} className="flex gap-2 mb-6">
-                 <input 
-                   placeholder="e.g. 172345..." 
-                   className="flex-1 border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-[#B08D55] focus:ring-1 focus:ring-[#B08D55]"
-                   value={orderId}
-                   onChange={e => setOrderId(e.target.value)}
-                 />
-                 <button type="submit" disabled={loading} className="bg-[#1A1A1A] text-white px-6 py-3 rounded-lg font-bold uppercase tracking-wider hover:bg-black transition-all">
-                    {loading ? '...' : 'Track'}
-                 </button>
-              </form>
-
-              {error && (
-                <div className="flex items-center gap-3 bg-red-50 text-red-600 p-4 rounded-lg text-sm">
-                   <AlertCircle size={20} /> {error}
-                </div>
-              )}
-
-              {order && (
-                <div className="animate-in fade-in slide-in-from-bottom-4">
-                   <div className="border-b border-gray-100 pb-4 mb-4">
-                      <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Status</p>
-                      <h2 className="text-2xl font-bold text-[#B08D55]">{order.status}</h2>
-                   </div>
-                   
-                   <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div><p className="text-xs text-gray-400">Order Date</p><p className="text-sm font-medium">{new Date(order.createdAt.seconds * 1000).toLocaleDateString()}</p></div>
-                      <div><p className="text-xs text-gray-400">Total Amount</p><p className="text-sm font-medium">₹{order.totalAmount}</p></div>
-                   </div>
-
-                   <OrderTimeline status={order.status} />
-
-                   {order.tracking && order.status === 'Shipped' && (
-                     <div className="mt-8 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <p className="text-xs font-bold text-blue-500 uppercase mb-2">Shipment Details</p>
-                        <p className="text-sm text-blue-900 font-medium">{order.tracking.courier}</p>
-                        <p className="text-sm text-blue-900">AWB: <span className="font-mono font-bold">{order.tracking.trackingId}</span></p>
-                     </div>
-                   )}
-                </div>
-              )}
-           </div>
-        </div>
-      </div>
-      <Footer />
-    </div>
-  );
-}
+export default TrackOrderPage;
