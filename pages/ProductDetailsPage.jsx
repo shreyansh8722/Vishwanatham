@@ -1,150 +1,127 @@
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Star, Truck, ShieldCheck, Heart, Minus, Plus, Home, ChevronRight } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Truck, ShieldCheck, Star, Minus, Plus, ChevronRight, Loader2, Heart, Share2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { useFavorites } from '../hooks/useFavorites';
 import { useProducts } from '../context/ProductContext';
+import { useFavorites } from '../hooks/useFavorites';
+import ProductGallery from '../components/shop/ProductGallery'; // Use new gallery
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { products, loading } = useProducts();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { products } = useProducts();
   
-  const productFound = products.find(p => p.id === parseInt(id));
-  
-  const defaultProduct = {
-    id: parseInt(id) || 1,
-    name: "Divine Rudraksha Mala",
-    price: 1500,
-    description: "Authentic 5-mukhi Rudraksha mala sourced directly from Kashi. Perfect for daily mantra chanting (Japa) and wearing for spiritual protection.",
-    images: [
-      "https://images.unsplash.com/photo-1611568285568-3d846513369a?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1603038930495-2c26279f6764?q=80&w=800&auto=format&fit=crop"
-    ],
-    category: "Rudraksha",
-    inStock: true
-  };
-
-  const product = productFound || defaultProduct;
-  const [selectedImage, setSelectedImage] = useState(product.images ? product.images[0] : product.image);
+  const product = products.find(p => String(p.id) === id);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('description');
-  const galleryImages = Array.isArray(product.images) ? product.images : [product.image];
+
+  if (loading) return <div className="h-screen flex items-center justify-center bg-[#FAFAFA]"><Loader2 className="animate-spin text-[#B08D55]" size={40} /></div>;
+  if (!product) return <div className="h-[60vh] flex flex-col items-center justify-center gap-4 bg-[#FAFAFA]"><h2 className="text-2xl font-serif text-[#2C1810]">Artifact Not Found</h2><button onClick={() => navigate('/shop')} className="text-[#B08D55] underline font-bold tracking-wide">Return to Sanctum</button></div>;
+
+  const galleryImages = product.imageUrls || [product.featuredImageUrl];
+  const price = Number(product.price);
+  const comparePrice = Number(product.comparePrice);
   const isLiked = isFavorite(product.id);
 
-  const handleAddToCart = () => {
-    addToCart(product, 'Standard', quantity);
-  };
-
   return (
-    <div className="pt-6 pb-20 bg-heritage-paper">
-      <div className="container mx-auto px-6">
+    <div className="pt-6 pb-20 bg-white min-h-screen font-sans">
+      <div className="container mx-auto px-4 md:px-8">
         
-        {/* FIX: Improved Breadcrumbs "Home > Product" */}
-        <div className="flex items-center gap-2 text-sm font-medium text-heritage-grey mb-8 font-manrope">
-          <Link to="/" className="flex items-center gap-1 hover:text-heritage-rudraksha transition-colors">
-            <Home size={14} />
-            Home
-          </Link>
-          <ChevronRight size={14} className="text-heritage-mist" />
-          <Link to="/shop" className="hover:text-heritage-rudraksha transition-colors">Shop</Link> 
-          <ChevronRight size={14} className="text-heritage-mist" />
-          <span className="text-heritage-charcoal truncate max-w-[200px]">{product.name}</span>
+        {/* Breadcrumbs */}
+        <div className="flex items-center gap-2 text-xs font-bold text-gray-400 mb-8 uppercase tracking-widest">
+          <Link to="/" className="hover:text-[#B08D55] transition-colors">Home</Link>
+          <ChevronRight size={10} />
+          <Link to="/shop" className="hover:text-[#B08D55] transition-colors">Collection</Link> 
+          <ChevronRight size={10} />
+          <span className="text-[#2C1810] truncate max-w-[200px]">{product.name}</span>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-12 mb-20">
-          {/* Gallery */}
-          <div className="w-full lg:w-1/2 flex flex-col-reverse md:flex-row gap-4">
-            {/* Thumbnails */}
-            <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-y-auto md:w-24 md:h-[600px] scrollbar-hide py-2 md:py-0">
-              {galleryImages.map((img, idx) => (
-                <img 
-                  key={idx}
-                  src={img}
-                  alt={`View ${idx}`}
-                  className={`w-20 h-24 object-cover cursor-pointer border rounded-md transition-all ${selectedImage === img ? 'border-heritage-rudraksha opacity-100 ring-1 ring-heritage-rudraksha' : 'border-transparent opacity-70 hover:opacity-100'}`}
-                  onClick={() => setSelectedImage(img)}
-                />
-              ))}
-            </div>
-            {/* Main Image */}
-            <div className="flex-1 h-[400px] md:h-[600px] bg-heritage-sand overflow-hidden rounded-lg border border-heritage-mist">
-              <img src={selectedImage} alt={product.name} className="w-full h-full object-cover" />
-            </div>
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
+          <div className="w-full lg:w-[55%]">
+             <ProductGallery images={galleryImages} />
           </div>
 
-          {/* Info */}
-          <div className="w-full lg:w-1/2 lg:pl-10">
-            <h1 className="font-cinzel text-3xl md:text-4xl font-bold text-heritage-charcoal mb-3">{product.name}</h1>
-            <div className="flex items-center gap-4 mb-6">
-              <span className="text-2xl font-cinzel font-semibold text-heritage-rudraksha">₹{product.price.toLocaleString()}</span>
-              <div className="flex items-center gap-1 text-heritage-gold text-sm">
-                <Star className="w-4 h-4 fill-current" />
-                <span className="text-heritage-grey ml-1 font-medium">(4.9/5)</span>
-              </div>
+          <div className="w-full lg:w-[45%] lg:sticky lg:top-28 h-fit">
+            <span className="inline-block px-3 py-1 bg-[#FDF6E7] text-[#B08D55] text-[10px] font-bold uppercase tracking-widest rounded-full mb-4">
+               {product.category || "Sacred Artifact"}
+            </span>
+
+            <h1 className="font-serif text-3xl md:text-4xl text-[#1C1917] mb-3 leading-tight">{product.name}</h1>
+            
+            <div className="flex items-center gap-2 mb-6 text-[#F2C75C]">
+               {[1,2,3,4,5].map(i => <Star key={i} size={14} fill="currentColor" />)}
+               <span className="text-xs text-gray-400 font-medium ml-2">(24 Reviews)</span>
             </div>
 
-            <p className="font-manrope text-heritage-grey leading-relaxed mb-8 text-base">
-              {product.description}
-            </p>
-
-            <div className="mb-8">
-              <span className="text-sm font-bold text-heritage-charcoal block mb-3">Quantity</span>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center border border-heritage-mist rounded-md w-32 justify-between">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 hover:bg-heritage-sand text-heritage-grey"><Minus className="w-4 h-4" /></button>
-                  <span className="font-manrope font-bold text-heritage-charcoal">{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} className="p-3 hover:bg-heritage-sand text-heritage-grey"><Plus className="w-4 h-4" /></button>
-                </div>
-                
-                <button 
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-heritage-rudraksha text-white py-3 px-8 text-sm font-bold rounded-md hover:bg-heritage-saffron transition-all shadow-md"
-                >
-                  Add to Cart
-                </button>
-                
-                <button 
-                  onClick={() => toggleFavorite(product)}
-                  className={`p-3 border border-heritage-mist rounded-md hover:border-heritage-rudraksha transition-colors ${isLiked ? 'text-red-600 border-red-200' : 'text-heritage-grey'}`}
-                >
-                  <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
-                </button>
-              </div>
+            <div className="flex items-end gap-4 mb-8 border-b border-gray-100 pb-8">
+              <span className="text-3xl font-bold text-[#2C1810]">₹{price.toLocaleString()}</span>
+              {comparePrice > price && (
+                 <div className="flex flex-col mb-1">
+                    <span className="text-sm text-gray-400 line-through">₹{comparePrice.toLocaleString()}</span>
+                    <span className="text-[10px] text-red-500 font-bold uppercase tracking-wide">Save ₹{(comparePrice - price).toLocaleString()}</span>
+                 </div>
+              )}
             </div>
 
-            {/* Guarantees */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-heritage-mist pt-8 mb-8">
-              <div className="flex items-center gap-3">
-                <Truck className="w-5 h-5 text-heritage-saffron" strokeWidth={1.5} />
-                <span className="text-sm font-medium text-heritage-charcoal">Free shipping over ₹2500</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5 text-heritage-saffron" strokeWidth={1.5} />
-                <span className="text-sm font-medium text-heritage-charcoal">Authenticity guaranteed</span>
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <div>
-              <div className="flex border-b border-heritage-mist mb-6">
-                {['Description', 'Details', 'Shipping'].map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab.toLowerCase())}
-                    className={`pb-3 mr-8 text-sm font-bold transition-colors capitalize ${activeTab === tab.toLowerCase() ? 'border-b-2 border-heritage-rudraksha text-heritage-rudraksha' : 'text-heritage-grey hover:text-heritage-charcoal'}`}
+            <div className="flex flex-col gap-5 mb-8">
+               <div className="flex items-center gap-4">
+                  <div className="flex items-center border border-gray-200 rounded-xl h-14 w-36 justify-between px-2 bg-[#FAFAFA]">
+                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 hover:text-[#B08D55] text-gray-400 transition-colors"><Minus size={18} /></button>
+                    <span className="font-bold text-lg text-[#1C1917]">{quantity}</span>
+                    <button onClick={() => setQuantity(quantity + 1)} className="p-3 hover:text-[#B08D55] text-gray-400 transition-colors"><Plus size={18} /></button>
+                  </div>
+                  
+                  <button 
+                    onClick={() => addToCart(product, 'Standard', quantity)}
+                    className="flex-1 bg-[#2C1810] text-white h-14 rounded-xl font-bold uppercase tracking-widest hover:bg-[#B08D55] transition-all shadow-xl hover:shadow-[#B08D55]/20 flex items-center justify-center gap-3 group"
                   >
-                    {tab}
+                    Add to Cart
+                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </button>
-                ))}
-              </div>
-              <div className="font-manrope text-sm text-heritage-grey leading-relaxed min-h-[100px]">
-                {activeTab === 'description' && <p>Deeply connected to Lord Shiva, Rudraksha beads are known for their protective and healing properties. This Mala is strung with high-quality silk thread and blessed in the Vishwanath temple.</p>}
-                {activeTab === 'details' && <ul className="list-disc pl-4 space-y-1"><li>Material: 5 Mukhi Rudraksha</li><li>Bead Size: 8mm</li><li>Length: 32 inches</li><li>Origin: Nepal/Indonesia</li></ul>}
-                {activeTab === 'shipping' && <p>Dispatched within 24 hours. Delivery takes 3-7 business days depending on location. International shipping available.</p>}
-              </div>
+
+                  <button onClick={() => toggleFavorite(product)} className={`h-14 w-14 border border-gray-200 rounded-xl flex items-center justify-center transition-colors ${isLiked ? 'text-red-500 bg-red-50 border-red-200' : 'text-gray-400 hover:border-[#B08D55] hover:text-[#B08D55]'}`}>
+                    <Heart size={24} fill={isLiked ? "currentColor" : "none"} />
+                  </button>
+               </div>
+               
+               <div className="flex justify-between items-center text-xs px-1">
+                 <p className="text-green-700 font-bold flex items-center gap-2">
+                   <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span></span>
+                   In Stock - Ready to Dispatch
+                 </p>
+                 <button className="flex items-center gap-1.5 text-gray-400 hover:text-[#2C1810] font-bold transition-colors uppercase tracking-wide"><Share2 size={14} /> Share</button>
+               </div>
             </div>
+
+            <div className="prose prose-sm text-gray-600 mb-8 leading-7 font-sans">
+              <p>{product.fullDescription || product.description || "Authentic spiritual artifact sourced directly from the holy city of Kashi."}</p>
+            </div>
+
+            <div className="bg-[#FAFAFA] rounded-2xl p-6 mb-8 border border-[#F0EBE5]">
+               <div className="grid grid-cols-2 gap-y-6 gap-x-8">
+                  {product.mukhi && <div><span className="block text-[#B08D55] text-[10px] uppercase font-bold tracking-widest mb-1">Mukhi</span><span className="font-serif text-lg text-[#2C1810]">{product.mukhi}</span></div>}
+                  {product.origin && <div><span className="block text-[#B08D55] text-[10px] uppercase font-bold tracking-widest mb-1">Origin</span><span className="font-serif text-lg text-[#2C1810]">{product.origin}</span></div>}
+                  {product.deity && <div><span className="block text-[#B08D55] text-[10px] uppercase font-bold tracking-widest mb-1">Deity</span><span className="font-serif text-lg text-[#2C1810]">{product.deity}</span></div>}
+                  {product.chakra && <div><span className="block text-[#B08D55] text-[10px] uppercase font-bold tracking-widest mb-1">Chakra</span><span className="font-serif text-lg text-[#2C1810]">{product.chakra}</span></div>}
+               </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 text-center">
+               <div className="p-4 rounded-xl bg-white border border-gray-100 hover:border-[#B08D55] transition-colors group">
+                 <Truck size={24} className="text-gray-400 group-hover:text-[#B08D55] mx-auto mb-2 transition-colors" strokeWidth={1.5} />
+                 <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 group-hover:text-[#2C1810]">Fast Ship</p>
+               </div>
+               <div className="p-4 rounded-xl bg-white border border-gray-100 hover:border-[#B08D55] transition-colors group">
+                 <ShieldCheck size={24} className="text-gray-400 group-hover:text-[#B08D55] mx-auto mb-2 transition-colors" strokeWidth={1.5} />
+                 <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 group-hover:text-[#2C1810]">Authentic</p>
+               </div>
+               <div className="p-4 rounded-xl bg-white border border-gray-100 hover:border-[#B08D55] transition-colors group">
+                 <Star size={24} className="text-gray-400 group-hover:text-[#B08D55] mx-auto mb-2 transition-colors" strokeWidth={1.5} />
+                 <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 group-hover:text-[#2C1810]">Premium</p>
+               </div>
+            </div>
+
           </div>
         </div>
       </div>

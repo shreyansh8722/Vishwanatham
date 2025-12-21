@@ -1,74 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, ChevronDown, X, SlidersHorizontal, ChevronRight, Home } from 'lucide-react';
+import { Filter, ChevronDown, X, SlidersHorizontal, ChevronRight, Home, Loader2 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '../components/shop/ProductCard';
-
-// --- MOCK DATA (For Visuals) ---
-const ALL_PRODUCTS = [
-  {
-    id: 1,
-    name: "Divine 5 Mukhi Rudraksha Mala",
-    price: 1250,
-    originalPrice: 2500,
-    images: ['https://images.unsplash.com/photo-1611568285568-3d846513369a?q=80&w=600', 'https://images.unsplash.com/photo-1603038930495-2c26279f6764?q=80&w=600'],
-    rating: 4.9,
-    category: "Rudraksha",
-    material: "Wood"
-  },
-  {
-    id: 2,
-    name: "Natural Amethyst Healing Bracelet",
-    price: 850,
-    originalPrice: 1500,
-    images: ['https://images.unsplash.com/photo-1590424600100-3486df5b9745?q=80&w=600', 'https://images.unsplash.com/photo-1610189012906-47833d772097?q=80&w=600'],
-    rating: 4.8,
-    category: "Gemstones",
-    material: "Crystal"
-  },
-  {
-    id: 3,
-    name: "Pure Copper Shri Yantra (3 Inch)",
-    price: 3500,
-    originalPrice: 4200,
-    images: ['https://images.unsplash.com/photo-1623151834261-24874f676239?q=80&w=600', 'https://images.unsplash.com/photo-1603038930495-2c26279f6764?q=80&w=600'],
-    rating: 5.0,
-    category: "Yantras",
-    material: "Metal"
-  },
-  {
-    id: 4,
-    name: "7 Chakra Balancing Stone Set",
-    price: 999,
-    originalPrice: 1999,
-    images: ['https://images.unsplash.com/photo-1567113300190-484852086433?q=80&w=600', 'https://images.unsplash.com/photo-1610189012906-47833d772097?q=80&w=600'],
-    rating: 4.7,
-    category: "Gemstones",
-    material: "Crystal"
-  },
-  {
-    id: 5,
-    name: "Gauri Shankar Rudraksha (Collector)",
-    price: 5500,
-    originalPrice: 7000,
-    images: ['https://images.unsplash.com/photo-1603038930495-2c26279f6764?q=80&w=600', 'https://images.unsplash.com/photo-1611568285568-3d846513369a?q=80&w=600'],
-    rating: 5.0,
-    category: "Rudraksha",
-    material: "Wood"
-  },
-  {
-    id: 6,
-    name: "Sandalwood Meditation Mala",
-    price: 1800,
-    originalPrice: 2200,
-    images: ['https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?q=80&w=600', 'https://images.unsplash.com/photo-1590424600100-3486df5b9745?q=80&w=600'],
-    rating: 4.6,
-    category: "Malas",
-    material: "Wood"
-  }
-];
+import { useProducts } from '../context/ProductContext'; // <--- IMPORT THIS
 
 const ShopPage = () => {
+  // 1. CONNECT TO REAL DATA
+  const { products, loading } = useProducts(); 
+  
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -88,15 +28,19 @@ const ShopPage = () => {
     );
   };
 
-  // Filter Logic
-  const filteredProducts = ALL_PRODUCTS.filter(product => {
+  // 2. FILTER LOGIC (Updated to use 'products' instead of 'ALL_PRODUCTS')
+  const filteredProducts = products.filter(product => {
     const matchCat = selectedCategories.length === 0 || selectedCategories.includes(product.category);
-    const matchPrice = product.price <= priceRange;
+    // Ensure we handle price as a number safely
+    const productPrice = Number(product.price) || 0; 
+    const matchPrice = productPrice <= priceRange;
     return matchCat && matchPrice;
   }).sort((a, b) => {
-    if (sortOrder === 'lowToHigh') return a.price - b.price;
-    if (sortOrder === 'highToLow') return b.price - a.price;
-    return 0; // Featured
+    const priceA = Number(a.price) || 0;
+    const priceB = Number(b.price) || 0;
+    if (sortOrder === 'lowToHigh') return priceA - priceB;
+    if (sortOrder === 'highToLow') return priceB - priceA;
+    return 0; // Featured (Default order)
   });
 
   return (
@@ -120,7 +64,11 @@ const ShopPage = () => {
         {/* --- 2. TOOLBAR (Mobile Filter + Sort) --- */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-heritage-mist pb-4">
           <p className="text-sm text-heritage-grey font-manrope">
-            Showing <span className="font-bold text-heritage-charcoal">{filteredProducts.length}</span> products
+            {loading ? (
+               <span className="flex items-center gap-2">Loading products...</span>
+            ) : (
+               <>Showing <span className="font-bold text-heritage-charcoal">{filteredProducts.length}</span> products</>
+            )}
           </p>
 
           <div className="flex w-full md:w-auto gap-4">
@@ -156,7 +104,7 @@ const ShopPage = () => {
             <div>
               <h3 className="font-cinzel text-lg font-bold text-heritage-charcoal mb-4">Category</h3>
               <div className="space-y-3">
-                {['Rudraksha', 'Gemstones', 'Yantras', 'Malas'].map(cat => (
+                {['Rudraksha', 'Gemstones', 'Yantras', 'Malas', 'Idols'].map(cat => (
                   <label key={cat} className="flex items-center gap-3 cursor-pointer group">
                     <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${selectedCategories.includes(cat) ? 'bg-heritage-rudraksha border-heritage-rudraksha' : 'border-heritage-mist bg-white group-hover:border-heritage-rudraksha'}`}>
                       {selectedCategories.includes(cat) && <span className="text-white text-xs font-bold">✓</span>}
@@ -181,7 +129,7 @@ const ShopPage = () => {
               <input 
                 type="range" 
                 min="500" 
-                max="10000" 
+                max="50000" 
                 step="500" 
                 value={priceRange} 
                 onChange={(e) => setPriceRange(Number(e.target.value))}
@@ -189,14 +137,18 @@ const ShopPage = () => {
               />
               <div className="flex justify-between text-xs text-heritage-grey mt-2 font-manrope">
                 <span>₹500</span>
-                <span>₹10,000+</span>
+                <span>₹50,000+</span>
               </div>
             </div>
           </aside>
 
           {/* --- 4. PRODUCT GRID --- */}
           <div className="flex-1">
-            {filteredProducts.length > 0 ? (
+            {loading ? (
+                <div className="flex justify-center py-20">
+                    <Loader2 className="animate-spin text-heritage-rudraksha" size={40} />
+                </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-10">
                 {filteredProducts.map(product => (
                   <ProductCard key={product.id} product={product} />
@@ -205,9 +157,9 @@ const ShopPage = () => {
             ) : (
               <div className="text-center py-20 bg-heritage-sand/30 rounded-lg border border-heritage-mist border-dashed">
                 <p className="font-cinzel text-xl text-heritage-charcoal mb-2">No products found</p>
-                <p className="text-sm text-heritage-grey">Try adjusting your filters</p>
+                <p className="text-sm text-heritage-grey">Try adjusting your filters or search query.</p>
                 <button 
-                  onClick={() => { setSelectedCategories([]); setPriceRange(10000); }}
+                  onClick={() => { setSelectedCategories([]); setPriceRange(50000); }}
                   className="mt-4 text-sm font-bold text-heritage-rudraksha border-b border-heritage-rudraksha pb-0.5 hover:text-heritage-saffron hover:border-heritage-saffron"
                 >
                   Clear all filters
@@ -246,7 +198,7 @@ const ShopPage = () => {
                   <div>
                     <h4 className="font-manrope text-sm font-bold text-heritage-charcoal mb-3 uppercase tracking-wider">Category</h4>
                     <div className="flex flex-wrap gap-2">
-                      {['Rudraksha', 'Gemstones', 'Yantras', 'Malas'].map(cat => (
+                      {['Rudraksha', 'Gemstones', 'Yantras', 'Malas', 'Idols'].map(cat => (
                         <button
                           key={cat}
                           onClick={() => toggleCategory(cat)}
@@ -270,7 +222,7 @@ const ShopPage = () => {
                      <input 
                       type="range" 
                       min="500" 
-                      max="10000" 
+                      max="50000" 
                       step="500" 
                       value={priceRange} 
                       onChange={(e) => setPriceRange(Number(e.target.value))}

@@ -1,63 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { db } from '../../lib/firebase'; // Ensure this path is correct
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { ProductCard } from '../shop/ProductCard';
+import React from 'react';
+import { useProducts } from '../../context/ProductContext'; 
+import ProductCard from '../shop/ProductCard'; 
 import { Loader2 } from 'lucide-react';
 
 export const NewArrivals = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // 1. Get data from the same source as Shop Page (The JSON File)
+  const { products, loading } = useProducts();
 
-  useEffect(() => {
-    const fetchNewArrivals = async () => {
-      try {
-        // Fetch 10 newest products
-        const q = query(
-          collection(db, 'products'), 
-          orderBy('createdAt', 'desc'), 
-          limit(10)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        setProducts(data);
-      } catch (error) {
-        console.error("Error fetching new arrivals:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // 2. Get the first 8 items
+  const latestProducts = products.slice(0, 8);
 
-    fetchNewArrivals();
-  }, []);
-
-  if (loading) return <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-[#B08D55]" /></div>;
+  if (loading) {
+    return (
+      <div className="py-20 flex justify-center">
+        <Loader2 className="animate-spin text-[#B08D55]" size={32} />
+      </div>
+    );
+  }
 
   return (
-    // REMOVED: bg-heritage-paper / bg-[#fcfbf9]
-    <section className="py-12 px-4"> 
+    <section className="py-16 px-4 bg-white"> 
       <div className="max-w-7xl mx-auto">
-        {/* Header - REMOVED: "Fresh from holy city" text */}
-        <div className="text-center mb-8 animate-fade-up">
-          <h2 className="font-cinzel text-2xl font-bold text-[#1a1a1a] mb-2">
+        {/* Header */}
+        <div className="text-center mb-10 animate-fade-up">
+          <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-[#1C1917] mb-3">
             New Arrivals
           </h2>
-          <div className="w-12 h-0.5 bg-[#B08D55] mx-auto rounded-full opacity-50"></div>
+          {/* Separator Line */}
+          <div className="w-16 h-0.5 bg-[#B08D55] mx-auto rounded-full"></div>
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-fade-up">
-          {products.length > 0 ? (
-            products.map((product) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8 animate-fade-up">
+          {latestProducts.length > 0 ? (
+            latestProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))
           ) : (
-            <div className="col-span-full text-center text-gray-400 py-10">
-              No products found. Add some from Admin Panel.
+            <div className="col-span-full text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+              <p className="text-gray-400 font-cinzel">Collection arriving soon.</p>
+              <p className="text-xs text-gray-300 mt-1">
+              
+              </p>
             </div>
           )}
         </div>

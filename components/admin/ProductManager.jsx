@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { db, storage } from '@/lib/firebase';
-import { 
-  collection, addDoc, deleteDoc, doc, updateDoc, 
-  serverTimestamp, onSnapshot, query, orderBy, getDocs 
-} from 'firebase/firestore';
+import { storage } from '../../lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { 
-  Trash2, Plus, Loader2, X, Edit2, Save, Search, 
-  UploadCloud 
+  Trash2, Plus, Loader2, X, Edit2, Save, Search, UploadCloud, 
+  MoreHorizontal, Filter, ArrowUpDown
 } from 'lucide-react';
-import { compressImage } from '@/lib/utils';
+import { compressImage } from '../../lib/utils'; 
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- DND-KIT (Drag & Drop) ---
+// --- DND Imports ---
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, 
   useSensor, useSensors,
@@ -23,23 +19,13 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// --- SORTABLE IMAGE COMPONENT ---
 const SortableImage = ({ id, url, isNew, onDelete }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
-
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="relative aspect-square bg-white rounded-lg border border-gray-200 overflow-hidden group cursor-grab active:cursor-grabbing hover:border-[#B08D55] transition-all shadow-sm">
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="relative aspect-square bg-gray-50 rounded-lg border border-gray-200 overflow-hidden group cursor-grab active:cursor-grabbing hover:border-[#B08D55] transition-all">
       <img src={url} className={`w-full h-full object-cover ${isNew ? 'opacity-90' : ''}`} alt="thumbnail" />
-      {isNew && <span className="absolute bottom-1 left-1 text-[8px] bg-green-500 text-white px-1 rounded">WEBP</span>}
-      <button 
-        type="button" 
-        onPointerDown={(e) => e.stopPropagation()} 
-        onClick={onDelete} 
-        className="absolute top-1 right-1 bg-white/90 text-red-500 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-50"
-      >
-        <Trash2 size={14} />
-      </button>
+      <button type="button" onPointerDown={(e) => e.stopPropagation()} onClick={onDelete} className="absolute top-1 right-1 bg-white shadow-sm text-red-500 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"><Trash2 size={12} /></button>
     </div>
   );
 };
@@ -52,48 +38,45 @@ export const ProductManager = () => {
   const [processing, setProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   
-  // Drawer State
+  // Drawer & Form State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [combinedImages, setCombinedImages] = useState([]); 
 
-  // Form & Image State
-  const [combinedImages, setCombinedImages] = useState([]);
-  
-  // --- SPIRITUAL STORE INITIAL STATE ---
   const initialState = {
     name: '', sku: '', price: '', comparePrice: '', 
     category: 'Rudraksha', description: '', stock: '',
-    
-    // Spiritual Attributes
     mukhi: '', origin: 'Nepal', certification: '',
     deity: '', planet: '', chakra: '', 
     weight: '', beadSize: '', mantra: '',
   };
   const [formData, setFormData] = useState(initialState);
+  const categories = ["Rudraksha", "Gemstones", "Yantras", "Malas", "Bracelets", "Idols"];
 
-  const categories = ["Rudraksha", "Gemstones", "Yantras", "Malas", "Bracelets", "Idols", "Puja Samagri"];
-
-  // Sensors for Drag & Drop
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // --- 1. FETCH DATA ---
-  useEffect(() => {
-    setLoading(true);
-    const qProd = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
-    const unsubProd = onSnapshot(qProd, (snapshot) => {
-      const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      setProducts(list);
-      setFilteredProducts(list);
-      setLoading(false);
-    });
-    return () => unsubProd();
-  }, []);
+  useEffect(() => { fetchProducts(); }, []);
 
-  // --- 2. SEARCH FILTER ---
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const url = await getDownloadURL(ref(storage, 'database/products.json'));
+      const res = await fetch(url);
+      const data = await res.json();
+      setProducts(data);
+      setFilteredProducts(data);
+    } catch (err) {
+      console.log("No existing database file", err);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!searchQuery) {
       setFilteredProducts(products);
@@ -101,13 +84,19 @@ export const ProductManager = () => {
       const lower = searchQuery.toLowerCase();
       setFilteredProducts(products.filter(p => 
         p.name?.toLowerCase().includes(lower) || 
-        p.sku?.toLowerCase().includes(lower) ||
         p.category?.toLowerCase().includes(lower)
       ));
     }
   }, [searchQuery, products]);
 
-  // --- 3. HANDLERS ---
+  const saveToCloud = async (newList) => {
+    const jsonString = JSON.stringify(newList);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const storageRef = ref(storage, 'database/products.json');
+    await uploadBytes(storageRef, blob);
+    setProducts(newList);
+  };
+
   const handleImageSelect = (e) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files).map((file, i) => ({
@@ -135,13 +124,7 @@ export const ProductManager = () => {
     if (product) {
       setEditMode(true);
       setEditId(product.id);
-      setFormData({
-        name: product.name, sku: product.sku || '', price: product.price, comparePrice: product.comparePrice || '',
-        category: product.category, description: product.fullDescription || '', stock: product.stock || 0,
-        mukhi: product.mukhi || '', origin: product.origin || '', certification: product.certification || '',
-        deity: product.deity || '', planet: product.planet || '', chakra: product.chakra || '',
-        weight: product.weight || '', beadSize: product.beadSize || '', mantra: product.mantra || '',
-      });
+      setFormData(product);
       setCombinedImages((product.imageUrls || []).map((url, i) => ({ id: `exist-${i}`, type: 'existing', url, file: null })));
     } else {
       setEditMode(false);
@@ -157,12 +140,11 @@ export const ProductManager = () => {
     if (combinedImages.length === 0) return alert("Please upload at least one image.");
     
     setProcessing(true);
-    setUploadProgress('Processing Images...');
+    setUploadProgress('Processing...');
     
     try {
       const imageUrls = await Promise.all(combinedImages.map(async (item) => {
         if (item.type === 'existing') return item.url;
-        // Compress Image
         const compressedFile = await compressImage(item.file); 
         const refName = `products/${Date.now()}_${item.id}.webp`;
         const sRef = ref(storage, refName);
@@ -170,82 +152,132 @@ export const ProductManager = () => {
         return await getDownloadURL(sRef);
       }));
 
-      const payload = {
+      const newProduct = {
         ...formData,
+        id: editMode ? editId : Date.now().toString(),
         price: Number(formData.price),
         comparePrice: Number(formData.comparePrice) || 0,
         stock: Number(formData.stock) || 0,
-        tags_lowercase: [formData.category, formData.name, formData.deity, formData.mukhi].map(s => s?.toLowerCase()).filter(Boolean),
-        featuredImageUrl: imageUrls[0],
         imageUrls: imageUrls,
+        featuredImageUrl: imageUrls[0],
         fullDescription: formData.description,
-        updatedAt: serverTimestamp()
+        createdAt: editMode ? (products.find(p => p.id === editId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
       };
 
+      let updatedList;
       if (editMode) {
-        await updateDoc(doc(db, 'products', editId), payload);
+        updatedList = products.map(p => p.id === editId ? newProduct : p);
       } else {
-        await addDoc(collection(db, 'products'), { ...payload, createdAt: serverTimestamp() });
+        updatedList = [newProduct, ...products];
       }
+
+      setUploadProgress('Saving DB...');
+      await saveToCloud(updatedList);
+
       setIsDrawerOpen(false);
+      alert(editMode ? "Saved!" : "Added!");
+      
     } catch (err) {
-      console.error(err);
       alert("Error: " + err.message);
     } finally {
       setProcessing(false);
-      setUploadProgress('');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure? This action is irreversible.")) await deleteDoc(doc(db, 'products', id));
+    if (window.confirm("Delete this item?")) {
+      const updatedList = products.filter(p => p.id !== id);
+      await saveToCloud(updatedList);
+    }
   };
 
   return (
-    <div className="h-full flex flex-col animate-fade-in">
-      {/* Top Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-          <input type="text" placeholder="Search Rudraksha, Yantras..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-[#B08D55] outline-none shadow-sm" />
+    <div className="animate-fade-in">
+      
+      {/* --- ACTION BAR --- */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+           <h2 className="text-xl font-bold text-gray-900">Products</h2>
+           <p className="text-sm text-gray-500 mt-1">Manage your inventory and catalog.</p>
         </div>
-        <button onClick={() => openDrawer()} className="bg-[#B08D55] text-white px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-[#967645] transition-colors shadow-md"><Plus size={18} /> Add Item</button>
+        <div className="flex gap-3">
+           <button className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm">
+             Export
+           </button>
+           <button onClick={() => openDrawer()} className="bg-[#1A1A1A] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-[#333] flex items-center gap-2">
+              <Plus size={16} /> Add Product
+           </button>
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex-1">
+      {/* --- TABLE CONTAINER --- */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        
+        {/* Filters */}
+        <div className="p-4 border-b border-gray-200 flex gap-4 bg-gray-50/50">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input 
+               type="text" 
+               placeholder="Search products..." 
+               value={searchQuery} 
+               onChange={(e) => setSearchQuery(e.target.value)} 
+               className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:border-gray-400 outline-none shadow-sm"
+            />
+          </div>
+          <button className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+             <Filter size={16} /> Filter
+          </button>
+          <button className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+             <ArrowUpDown size={16} /> Sort
+          </button>
+        </div>
+
+        {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 font-medium">
+            <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-200">
               <tr>
-                <th className="p-4 pl-6 w-20">Image</th>
-                <th className="p-4">Name</th>
-                <th className="p-4">Category</th>
-                <th className="p-4">Origin/Deity</th>
-                <th className="p-4">Stock</th>
-                <th className="p-4">Price</th>
-                <th className="p-4 text-right pr-6">Actions</th>
+                <th className="p-4 w-12"><input type="checkbox" className="rounded border-gray-300" /></th>
+                <th className="p-4 font-medium w-20">Image</th>
+                <th className="p-4 font-medium">Product Name</th>
+                <th className="p-4 font-medium">Status</th>
+                <th className="p-4 font-medium">Inventory</th>
+                <th className="p-4 font-medium">Category</th>
+                <th className="p-4 font-medium">Price</th>
+                <th className="p-4 w-10"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan="7" className="p-10 text-center"><Loader2 className="animate-spin mx-auto text-gray-400"/></td></tr>
+                <tr><td colSpan="8" className="p-8 text-center text-gray-500"><Loader2 className="animate-spin mx-auto mb-2"/>Loading inventory...</td></tr>
               ) : filteredProducts.map(p => (
                 <tr key={p.id} className="hover:bg-gray-50 group transition-colors">
-                  <td className="p-4 pl-6">
-                    <div className="w-12 h-12 bg-gray-100 rounded-md border border-gray-200 overflow-hidden">
+                  <td className="p-4"><input type="checkbox" className="rounded border-gray-300" /></td>
+                  <td className="p-4">
+                    <div className="w-10 h-10 bg-gray-100 rounded border border-gray-200 overflow-hidden">
                       <img src={p.featuredImageUrl} className="w-full h-full object-cover" alt="" />
                     </div>
                   </td>
-                  <td className="p-4 font-medium text-gray-900">{p.name}<div className="text-xs text-gray-400 font-mono mt-0.5">{p.sku}</div></td>
-                  <td className="p-4 text-gray-600"><span className="bg-[#B08D55]/10 text-[#B08D55] px-2 py-1 rounded text-xs font-bold">{p.category}</span></td>
-                  <td className="p-4 text-xs text-gray-500">{p.origin || '-'}{p.deity ? ` • ${p.deity}` : ''}</td>
-                  <td className="p-4"><span className={`text-xs font-bold px-2 py-1 rounded ${p.stock < 5 ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-700'}`}>{p.stock}</span></td>
+                  <td className="p-4 font-medium text-gray-900 cursor-pointer hover:underline" onClick={() => openDrawer(p)}>
+                    {p.name}
+                  </td>
+                  <td className="p-4">
+                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                       Active
+                     </span>
+                  </td>
+                  <td className="p-4 text-gray-600">
+                    {p.stock} in stock
+                  </td>
+                  <td className="p-4 text-gray-500">{p.category}</td>
                   <td className="p-4 font-medium">₹{p.price}</td>
-                  <td className="p-4 pr-6 text-right">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => openDrawer(p)} className="p-2 text-gray-500 hover:text-[#B08D55] hover:bg-[#B08D55]/10 rounded"><Edit2 size={16}/></button>
-                      <button onClick={() => handleDelete(p.id)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 size={16}/></button>
+                  <td className="p-4 text-right">
+                    <div className="relative">
+                       <button className="p-2 hover:bg-gray-200 rounded text-gray-400 hover:text-gray-600">
+                         <MoreHorizontal size={16} />
+                       </button>
+                       {/* Quick Actions (Hidden for simplicity, could be a dropdown) */}
                     </div>
                   </td>
                 </tr>
@@ -253,52 +285,83 @@ export const ProductManager = () => {
             </tbody>
           </table>
         </div>
+        
+        {/* Pagination Footer */}
+        <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center text-xs text-gray-500">
+           <span>Showing {filteredProducts.length} items</span>
+           <div className="flex gap-2">
+              <button className="px-3 py-1 bg-white border rounded hover:bg-gray-100" disabled>Previous</button>
+              <button className="px-3 py-1 bg-white border rounded hover:bg-gray-100" disabled>Next</button>
+           </div>
+        </div>
       </div>
 
-      {/* Drawer - Z-INDEX 100 FIXED */}
+      {/* --- ADD/EDIT DRAWER (FIXED Z-INDEX) --- */}
       <AnimatePresence>
         {isDrawerOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]" onClick={() => setIsDrawerOpen(false)} />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed inset-y-0 right-0 z-[110] w-full max-w-2xl bg-white shadow-2xl flex flex-col">
-              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-white z-10">
-                <h3 className="font-bold text-lg text-gray-900 font-serif">{editMode ? 'Edit Spiritual Item' : 'New Divine Item'}</h3>
-                <button onClick={() => setIsDrawerOpen(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500"><X size={20}/></button>
+            {/* 1. Backdrop (Z-Index 9990) */}
+            <motion.div 
+               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+               className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9990]" 
+               onClick={() => setIsDrawerOpen(false)} 
+            />
+            
+            {/* 2. Drawer (Z-Index 9999) - THIS FIXES THE ISSUE */}
+            <motion.div 
+               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} 
+               transition={{ type: "spring", damping: 25, stiffness: 200 }} 
+               className="fixed inset-y-0 right-0 z-[9999] w-full max-w-2xl bg-white shadow-2xl flex flex-col border-l border-gray-200"
+            >
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-white">
+                <div>
+                   <h3 className="font-bold text-lg text-gray-900">{editMode ? 'Edit Product' : 'Add Product'}</h3>
+                   <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mt-1">
+                      {editMode ? 'Update details' : 'New Item'}
+                   </p>
+                </div>
+                <button onClick={() => setIsDrawerOpen(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"><X size={20}/></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto bg-gray-50 p-6 space-y-6">
+              {/* Scrollable Form */}
+              <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
                 <form id="product-form" onSubmit={handleSubmit} className="space-y-6">
                   
                   {/* Basic Info */}
                   <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm space-y-4">
-                    <h4 className="font-bold text-sm text-gray-900 uppercase tracking-wide border-b pb-2 mb-2">Item Details</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="col-span-2">
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Product Name</label>
-                        <input required className="w-full p-2.5 bg-white border border-gray-300 rounded text-sm focus:border-[#B08D55] outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                      </div>
+                    <div className="grid grid-cols-1 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">SKU Code</label>
-                        <input className="w-full p-2.5 bg-white border border-gray-300 rounded text-sm focus:border-[#B08D55] outline-none" value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} />
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Title</label>
+                        <input required placeholder="e.g. 5 Mukhi Rudraksha" className="w-full p-2 bg-white border border-gray-300 rounded text-sm focus:border-black focus:ring-1 focus:ring-black outline-none transition-all" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                       </div>
-                      <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
-                        <select className="w-full p-2.5 bg-white border border-gray-300 rounded text-sm focus:border-[#B08D55] outline-none" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>{categories.map(c => <option key={c} value={c}>{c}</option>)}</select>
+                      <div className="grid grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+                           <select className="w-full p-2 bg-white border border-gray-300 rounded text-sm focus:border-black outline-none" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>{categories.map(c => <option key={c} value={c}>{c}</option>)}</select>
+                         </div>
+                         <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Status</label>
+                            <select className="w-full p-2 bg-white border border-gray-300 rounded text-sm focus:border-black outline-none"><option>Active</option><option>Draft</option></select>
+                         </div>
                       </div>
                     </div>
-                    <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Description & Significance</label><textarea rows="4" className="w-full p-2.5 bg-white border border-gray-300 rounded text-sm focus:border-[#B08D55] outline-none" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
+                    <div>
+                       <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
+                       <textarea rows="4" className="w-full p-2 bg-white border border-gray-300 rounded text-sm focus:border-black outline-none" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                    </div>
                   </div>
 
                   {/* Media */}
                   <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm space-y-4">
-                    <h4 className="font-bold text-sm text-gray-900 uppercase tracking-wide border-b pb-2 mb-2">Images (Auto-Compressed)</h4>
+                    <h4 className="font-bold text-sm text-gray-900 uppercase tracking-wide border-b pb-2 mb-2">Media</h4>
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                       <SortableContext items={combinedImages} strategy={rectSortingStrategy}>
                         <div className="grid grid-cols-4 gap-4">
                           {combinedImages.map((item) => <SortableImage key={item.id} id={item.id} url={item.url} isNew={item.type === 'new'} onDelete={() => setCombinedImages(prev => prev.filter(i => i.id !== item.id))} />)}
-                          <label className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-[#B08D55] hover:bg-[#B08D55]/5 transition-all bg-gray-50">
+                          <label className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-black hover:bg-gray-50 transition-all">
                             <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageSelect} />
-                            <UploadCloud className="text-gray-400 mb-1" size={24} /><span className="text-[10px] uppercase font-bold text-gray-400">Upload</span>
+                            <UploadCloud className="text-gray-400 mb-1" size={24} /><span className="text-[10px] font-bold text-gray-500">Add</span>
                           </label>
                         </div>
                       </SortableContext>
@@ -307,22 +370,22 @@ export const ProductManager = () => {
 
                   {/* Pricing */}
                   <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm space-y-4">
-                    <h4 className="font-bold text-sm text-gray-900 uppercase tracking-wide border-b pb-2 mb-2">Pricing & Inventory</h4>
+                    <h4 className="font-bold text-sm text-gray-900 uppercase tracking-wide border-b pb-2 mb-2">Pricing</h4>
                     <div className="grid grid-cols-3 gap-4">
-                      <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Price (₹)</label><input type="number" required className="w-full p-2.5 border border-gray-300 rounded text-sm focus:border-[#B08D55] outline-none" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div>
-                      <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Compare Price</label><input type="number" className="w-full p-2.5 border border-gray-300 rounded text-sm focus:border-[#B08D55] outline-none" value={formData.comparePrice} onChange={e => setFormData({...formData, comparePrice: e.target.value})} /></div>
-                      <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Stock Qty</label><input type="number" required className="w-full p-2.5 border border-gray-300 rounded text-sm focus:border-[#B08D55] outline-none" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} /></div>
+                      <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Price</label><div className="relative"><span className="absolute left-3 top-2 text-gray-500">₹</span><input type="number" required className="w-full pl-6 p-2 border border-gray-300 rounded text-sm focus:border-black outline-none" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div></div>
+                      <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Compare</label><div className="relative"><span className="absolute left-3 top-2 text-gray-500">₹</span><input type="number" className="w-full pl-6 p-2 border border-gray-300 rounded text-sm focus:border-black outline-none" value={formData.comparePrice} onChange={e => setFormData({...formData, comparePrice: e.target.value})} /></div></div>
+                      <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Stock</label><input type="number" required className="w-full p-2 border border-gray-300 rounded text-sm focus:border-black outline-none" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} /></div>
                     </div>
                   </div>
-
-                  {/* Spiritual Attributes */}
+                  
+                  {/* Attributes */}
                   <div className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm space-y-4">
-                    <h4 className="font-bold text-sm text-gray-900 uppercase tracking-wide border-b pb-2 mb-2">Spiritual Attributes</h4>
+                    <h4 className="font-bold text-sm text-gray-900 uppercase tracking-wide border-b pb-2 mb-2">Attributes</h4>
                     <div className="grid grid-cols-2 gap-4">
-                        {['mukhi', 'origin', 'deity', 'planet', 'chakra', 'certification', 'weight', 'mantra'].map(field => (
+                        {['mukhi', 'origin', 'deity', 'planet', 'certification', 'weight'].map(field => (
                           <div key={field}>
                             <label className="block text-xs font-bold text-gray-500 uppercase mb-1 capitalize">{field}</label>
-                            <input className="w-full p-2.5 border border-gray-300 rounded text-sm focus:border-[#B08D55] outline-none" value={formData[field]} onChange={e => setFormData({...formData, [field]: e.target.value})} />
+                            <input className="w-full p-2 border border-gray-300 rounded text-sm focus:border-black outline-none" value={formData[field]} onChange={e => setFormData({...formData, [field]: e.target.value})} />
                           </div>
                         ))}
                     </div>
@@ -331,10 +394,12 @@ export const ProductManager = () => {
                 </form>
               </div>
 
-              <div className="p-4 border-t border-gray-200 bg-white">
-                <button form="product-form" disabled={processing} className="w-full bg-[#B08D55] text-white py-3 rounded-lg text-sm font-bold uppercase tracking-widest hover:bg-[#967645] transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-70">
-                  {processing ? <><Loader2 className="animate-spin" /> {uploadProgress}</> : <><Save size={18} /> {editMode ? 'Update Item' : 'Publish Item'}</>}
-                </button>
+              {/* Footer */}
+              <div className="p-4 border-t border-gray-200 bg-white flex justify-end gap-3">
+                 <button onClick={() => setIsDrawerOpen(false)} className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                 <button form="product-form" disabled={processing} className="px-6 py-2 bg-[#1A1A1A] text-white rounded-lg text-sm font-bold hover:bg-black transition-all flex items-center gap-2 shadow-lg disabled:opacity-70">
+                    {processing ? <><Loader2 className="animate-spin" size={16} /> Saving...</> : <><Save size={16} /> Save Product</>}
+                 </button>
               </div>
             </motion.div>
           </>

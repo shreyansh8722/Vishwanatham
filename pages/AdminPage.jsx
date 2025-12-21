@@ -1,177 +1,128 @@
 import React, { useState } from 'react';
 import { 
-  LayoutDashboard, ShoppingBag, Package, Users, 
-  MessageSquare, Layers, Tag, Settings, 
-  ChevronRight, Bell, Search, Menu, X, LogOut,
-  Palette, BarChart3, Globe
+  LayoutDashboard, ShoppingBag, Users, FileText, 
+  Settings, LogOut, Menu, Bell, Search,
+  ChevronRight, Home, BarChart3, Tag, Image as ImageIcon
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth'; 
-
-// --- Import All Managers ---
-import { AdminDashboard } from '../components/admin/AdminDashboard';
+import { useAuth } from '../hooks/useAuth';
 import { ProductManager } from '../components/admin/ProductManager';
-import { OrderManager } from '../components/admin/OrderManager';
-import { InventoryManager } from '../components/admin/InventoryManager';
-import { CustomerManager } from '../components/admin/CustomerManager'; // Fixed Import
-import { MessageInbox } from '../components/admin/MessageInbox';
-import { ContentManager } from '../components/admin/ContentManager';
-import { StorefrontManager } from '../components/admin/StorefrontManager';
-import { CouponManager } from '../components/admin/CouponManager';
-import { SettingsManager } from '../components/admin/SettingsManager';
+import { useNavigate } from 'react-router-dom';
 
-const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { logout } = useAuth(); 
+// Import other managers if you have them, or use placeholders
+// import { OrderManager } from '../components/admin/OrderManager'; 
+
+export const AdminPage = () => {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('products');
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
+
+  // Redirect if not admin (Basic protection)
+  if (!user || user.role !== 'admin') {
+     return <div className="p-10 text-center">Access Denied. <button onClick={() => navigate('/login')} className="underline">Login</button></div>;
+  }
 
   const menuItems = [
-    {
-      category: "Overview",
-      items: [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      ]
-    },
-    {
-      category: "Store Management",
-      items: [
-        { id: 'orders', label: 'Orders', icon: ShoppingBag },
-        { id: 'products', label: 'Products', icon: Package },
-        { id: 'inventory', label: 'Inventory', icon: BarChart3 },
-      ]
-    },
-    {
-      category: "Customers",
-      items: [
-        { id: 'customers', label: 'Customers', icon: Users },
-        { id: 'inbox', label: 'Inbox', icon: MessageSquare },
-        { id: 'content', label: 'Reviews & FAQs', icon: Layers },
-      ]
-    },
-    {
-      category: "Marketing & Design",
-      items: [
-        { id: 'storefront', label: 'Online Store', icon: Palette },
-        { id: 'coupons', label: 'Discounts', icon: Tag },
-      ]
-    },
-    {
-      category: "System",
-      items: [
-        { id: 'settings', label: 'Settings', icon: Settings },
-      ]
-    }
+    { id: 'dashboard', label: 'Home', icon: Home },
+    { id: 'orders', label: 'Orders', icon: FileText },
+    { id: 'products', label: 'Products', icon: Tag },
+    { id: 'customers', label: 'Customers', icon: Users },
+    { id: 'content', label: 'Content', icon: ImageIcon },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard': return <AdminDashboard onChangeTab={setActiveTab} />;
-      case 'products': return <ProductManager />;
-      case 'orders': return <OrderManager />;
-      case 'inventory': return <InventoryManager />;
-      case 'customers': return <CustomerManager />;
-      case 'inbox': return <MessageInbox />;
-      case 'content': return <ContentManager />;
-      case 'storefront': return <StorefrontManager />;
-      case 'coupons': return <CouponManager />;
-      case 'settings': return <SettingsManager />;
-      default: return <AdminDashboard onChangeTab={setActiveTab} />;
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 flex font-manrope">
+    <div className="flex h-screen bg-[#F1F2F4] font-sans">
       
-      {/* --- SIDEBAR --- */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#1a1a1a] text-gray-400 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        
-        {/* Brand Header */}
-        <div className="h-16 flex items-center px-6 border-b border-gray-800 bg-[#1a1a1a]">
-           <Globe className="text-[#B08D55] mr-3" size={24} />
-           <span className="text-white font-serif font-bold text-lg tracking-wide">Vishwanatham</span>
-           <button onClick={() => setIsMobileMenuOpen(false)} className="ml-auto lg:hidden text-gray-400">
-             <X size={20} />
-           </button>
+      {/* --- SIDEBAR (Shopify Style) --- */}
+      <aside className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-[#1A1A1A] text-[#E3E3E3] transition-all duration-300 flex flex-col flex-shrink-0 z-50`}>
+        {/* Logo Area */}
+        <div className="h-16 flex items-center px-4 bg-[#2C2C2C] border-b border-[#444]">
+           <div className="w-8 h-8 bg-[#B08D55] rounded-md flex items-center justify-center font-bold text-white shrink-0">
+             V
+           </div>
+           {isSidebarOpen && <span className="ml-3 font-bold tracking-wide">Vishwanatham</span>}
         </div>
 
-        {/* Navigation Links */}
-        <nav className="p-4 space-y-8 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar">
-          {menuItems.map((group, idx) => (
-            <div key={idx}>
-              <h4 className="px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">{group.category}</h4>
-              <ul className="space-y-1">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  return (
-                    <li key={item.id}>
-                      <button
-                        onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative
-                          ${isActive 
-                            ? 'bg-[#B08D55] text-white shadow-lg shadow-[#B08D55]/20' 
-                            : 'hover:bg-gray-800 hover:text-gray-100'
-                          }`}
-                      >
-                        <Icon size={18} className={isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-300'} />
-                        {item.label}
-                        {isActive && <ChevronRight size={14} className="absolute right-3 opacity-50" />}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-
-          <div className="pt-4 mt-4 border-t border-gray-800">
-            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors">
-              <LogOut size={18} /> Sign Out
+        {/* Navigation */}
+        <nav className="flex-1 py-4 space-y-1 overflow-y-auto">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`w-full flex items-center px-4 py-2 text-sm font-medium transition-colors border-l-4 ${
+                activeTab === item.id 
+                  ? 'bg-[#303030] border-[#B08D55] text-white' 
+                  : 'border-transparent hover:bg-[#303030] text-[#A1A1A1]'
+              }`}
+            >
+              <item.icon size={20} strokeWidth={1.5} />
+              {isSidebarOpen && <span className="ml-3">{item.label}</span>}
             </button>
-          </div>
+          ))}
         </nav>
+
+        {/* User / Logout */}
+        <div className="p-4 border-t border-[#444] bg-[#2C2C2C]">
+           <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-xs font-bold text-white">
+                {user.email?.[0].toUpperCase()}
+              </div>
+              {isSidebarOpen && (
+                <div className="flex-1 min-w-0">
+                   <p className="text-sm font-medium truncate text-white">{user.email}</p>
+                   <button onClick={logout} className="text-xs text-gray-400 hover:text-white flex items-center gap-1 mt-1">
+                     <LogOut size={12} /> Sign out
+                   </button>
+                </div>
+              )}
+           </div>
+        </div>
       </aside>
 
-      {/* --- MAIN CONTENT --- */}
+      {/* --- MAIN CONTENT AREA --- */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
+        
+        {/* Top Header */}
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-40">
            <div className="flex items-center gap-4">
-              <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-md">
-                 <Menu size={20} />
+              <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-gray-100 rounded-md text-gray-600">
+                <Menu size={20} />
               </button>
-              <h1 className="font-serif text-xl font-bold text-gray-900 capitalize">
-                {menuItems.flatMap(g => g.items).find(i => i.id === activeTab)?.label}
-              </h1>
+              <h1 className="text-lg font-bold text-gray-800 capitalize">{activeTab}</h1>
            </div>
+
            <div className="flex items-center gap-4">
-              <button className="relative p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+              <div className="relative hidden md:block">
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                 <input 
+                   type="text" 
+                   placeholder="Search store..." 
+                   className="pl-9 pr-4 py-1.5 bg-gray-100 border-transparent focus:bg-white focus:border-gray-300 rounded-md text-sm outline-none transition-all w-64 border"
+                 />
+              </div>
+              <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full relative">
                  <Bell size={20} />
-                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
-              <div className="h-8 w-8 rounded-full bg-[#1a1a1a] text-[#B08D55] flex items-center justify-center font-bold text-xs border-2 border-gray-100">V</div>
            </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-50/50">
-          <div className="max-w-7xl mx-auto">
-             {renderContent()}
-          </div>
+        {/* Content Scroll Area */}
+        <main className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+           <div className="max-w-6xl mx-auto">
+              {activeTab === 'products' && <ProductManager />}
+              {activeTab === 'dashboard' && (
+                 <div className="p-10 text-center text-gray-500">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back, {user.email}</h2>
+                    <p>Select "Products" from the sidebar to manage your store.</p>
+                 </div>
+              )}
+              {/* Add other components here */}
+           </div>
         </main>
       </div>
-
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-      )}
     </div>
   );
 };
