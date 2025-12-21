@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingBag, Search, ChevronDown, User, Heart, Menu, X } from 'lucide-react';
+import { ShoppingBag, Search, ChevronDown, User, Menu, X } from 'lucide-react'; // Removed Heart
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -7,7 +7,7 @@ import BrandLogo from './BrandLogo';
 import NewsletterPopup from './NewsletterPopup';
 import { useAuth } from '../../hooks/useAuth';
 import { useCart } from '../../context/CartContext';
-import { useFavorites } from '../../hooks/useFavorites';
+// Removed useFavorites import
 
 const navItems = [
   { 
@@ -49,7 +49,7 @@ export const Navbar = () => {
 
   const { user } = useAuth();
   const { cartItems, setIsCartOpen } = useCart();
-  const { favorites } = useFavorites();
+  // Removed favorites hook usage
   const location = useLocation();
   const navigate = useNavigate();
   const cartItemCount = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
@@ -93,7 +93,7 @@ export const Navbar = () => {
     <>
       <NewsletterPopup />
 
-      {/* 1. ANNOUNCEMENT BAR (Scrolls away) */}
+      {/* 1. ANNOUNCEMENT BAR */}
       <div className="bg-heritage-rudraksha text-white border-b border-[#3E2215] h-9 w-full relative z-[160]">
         <div className="container mx-auto h-full flex items-center justify-center">
           <AnimatePresence mode="wait">
@@ -176,11 +176,8 @@ export const Navbar = () => {
               </Link>
             </div>
 
-            {/* RIGHT: User Actions */}
+            {/* RIGHT: User Actions (Removed Heart) */}
             <div className="w-1/3 flex items-center justify-end gap-5">
-              <Link to="/favorites" className="hidden md:block relative text-heritage-charcoal hover:text-heritage-rudraksha transition-colors">
-                <Heart className="w-6 h-6" strokeWidth={1.5} />
-              </Link>
               <Link to={user ? "/profile" : "/login"} className="text-heritage-charcoal hover:text-heritage-rudraksha transition-colors">
                 <User className="w-6 h-6" strokeWidth={1.5} />
               </Link>

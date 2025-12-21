@@ -1,117 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { Mail, Trash2, MailOpen, Clock, User, Search } from 'lucide-react';
+import { Mail, Trash2, MailOpen, Clock, User, CheckCircle } from 'lucide-react';
 
 export const MessageInbox = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snap) => {
+    const unsub = onSnapshot(query(collection(db, 'messages'), orderBy('createdAt', 'desc')), (snap) => {
       setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
     });
     return unsub;
   }, []);
 
-  const markAsRead = async (id, currentStatus) => {
-    if(currentStatus) return; // Already read
-    await updateDoc(doc(db, 'messages', id), { read: true });
+  const markRead = async (id, read) => {
+    if (!read) await updateDoc(doc(db, 'messages', id), { read: true });
   };
 
-  const deleteMessage = async (e, id) => {
+  const deleteMsg = async (e, id) => {
     e.stopPropagation();
-    if(window.confirm('Delete this message?')) {
-      await deleteDoc(doc(db, 'messages', id));
-    }
+    if(confirm('Delete message?')) await deleteDoc(doc(db, 'messages', id));
   };
 
-  const filtered = messages.filter(m => 
-    m.email?.toLowerCase().includes(search.toLowerCase()) || 
-    m.name?.toLowerCase().includes(search.toLowerCase()) ||
-    m.subject?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  if (loading) return <div className="p-10 text-center text-gray-400">Loading messages...</div>;
+  if (loading) return <div className="p-10 text-center text-gray-400">Loading inbox...</div>;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
-             <Mail className="text-[#B08D55]" /> Customer Inquiries
-          </h3>
-          <p className="text-sm text-gray-500">Manage support requests from the contact page.</p>
-        </div>
-        
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-          <input 
-            type="text" 
-            placeholder="Search messages..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#B08D55] transition-all"
-          />
-        </div>
-      </div>
-
-      {/* List */}
-      <div className="divide-y divide-gray-100 overflow-y-auto flex-1 bg-gray-50/30">
-        {filtered.length === 0 ? (
-          <div className="p-20 text-center text-gray-400">
-            <Mail size={48} className="mx-auto mb-4 opacity-20" />
-            <p>No messages found.</p>
-          </div>
-        ) : (
-          filtered.map(msg => (
-            <div 
-              key={msg.id} 
-              onClick={() => markAsRead(msg.id, msg.read)}
-              className={`p-6 hover:bg-white transition-all cursor-pointer group border-l-4 ${
-                !msg.read ? 'border-l-[#B08D55] bg-white' : 'border-l-transparent bg-gray-50/50'
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                 <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full ${!msg.read ? 'bg-[#B08D55]/10 text-[#B08D55]' : 'bg-gray-200 text-gray-500'}`}>
-                      {msg.read ? <MailOpen size={16} /> : <Mail size={16} />}
-                    </div>
-                    <div>
-                       <h4 className={`text-sm ${!msg.read ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>
-                         {msg.subject || 'No Subject'}
-                       </h4>
-                       <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                          <User size={12} /> {msg.name} &lt;{msg.email}&gt;
-                       </div>
-                    </div>
-                 </div>
-                 <div className="flex items-center gap-4">
-                    <span className="text-xs text-gray-400 flex items-center gap-1 whitespace-nowrap">
-                      <Clock size={12} />
-                      {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleDateString() : 'Just now'}
-                    </span>
-                    <button 
-                      onClick={(e) => deleteMessage(e, msg.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors opacity-0 group-hover:opacity-100"
-                      title="Delete Message"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                 </div>
-              </div>
-              
-              <p className={`text-sm mt-3 pl-11 ${!msg.read ? 'text-gray-800' : 'text-gray-500'}`}>
-                {msg.message}
-              </p>
-            </div>
-          ))
-        )}
-      </div>
+    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+       <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"><Mail className="text-[#B08D55]"/> Customer Inquiries</h2>
+       
+       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden divide-y divide-gray-100">
+          {messages.length === 0 ? (
+             <div className="p-12 text-center text-gray-400">No messages yet.</div>
+          ) : (
+             messages.map(msg => (
+                <div 
+                  key={msg.id} 
+                  onClick={() => markRead(msg.id, msg.read)}
+                  className={`p-6 cursor-pointer hover:bg-gray-50 transition-colors group relative ${!msg.read ? 'bg-blue-50/30' : ''}`}
+                >
+                   <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-3">
+                         <div className={`p-2 rounded-full ${msg.read ? 'bg-gray-100 text-gray-400' : 'bg-[#B08D55] text-white'}`}>
+                            {msg.read ? <MailOpen size={16}/> : <Mail size={16}/>}
+                         </div>
+                         <div>
+                            <h4 className={`text-sm ${!msg.read ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>{msg.subject}</h4>
+                            <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5"><User size={10}/> {msg.name} &lt;{msg.email}&gt;</p>
+                         </div>
+                      </div>
+                      <span className="text-xs text-gray-400">{msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleDateString() : 'Now'}</span>
+                   </div>
+                   <p className="text-sm text-gray-600 pl-11 leading-relaxed">{msg.message}</p>
+                   
+                   <button onClick={(e) => deleteMsg(e, msg.id)} className="absolute top-6 right-6 p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Trash2 size={18} />
+                   </button>
+                </div>
+             ))
+          )}
+       </div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
-// Layout Components (Imports work with both named and default exports now)
+// Layout Components
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { CartModal } from './components/shop/CartModal';
@@ -29,8 +29,8 @@ import TermsPage from './pages/TermsPage';
 import ReturnPolicy from './pages/ReturnPolicy';
 import AdminPage from './pages/AdminPage';
 
-// Auth Protection
-import { ProtectedRoute } from './components/ProtectedRoute';
+// Auth Protection (Ensure you have updated ProtectedRoute.jsx to export AdminRoute)
+import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -45,7 +45,6 @@ function App() {
       <Navbar />
 
       {/* Main Content Area */}
-      {/* Remove padding-top here if Navbar is handled differently, but generally needed for fixed/sticky nav */}
       <main className="flex-grow"> 
         <Routes>
           {/* Public Routes */}
@@ -67,7 +66,7 @@ function App() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/returns" element={<ReturnPolicy />} />
 
-          {/* Protected Routes (User) */}
+          {/* Protected Routes (User-only) */}
           <Route element={<ProtectedRoute />}>
              <Route path="/profile" element={<ProfilePage />} />
              <Route path="/checkout" element={<CheckoutPage />} />
@@ -75,8 +74,10 @@ function App() {
              <Route path="/favorites" element={<FavoritesPage />} />
           </Route>
 
-          {/* Admin Routes */}
-          <Route path="/admin/*" element={<AdminPage />} />
+          {/* Admin Routes (Secured specifically for Admin accounts) */}
+          <Route element={<AdminRoute />}>
+            <Route path="/admin/*" element={<AdminPage />} />
+          </Route>
 
           {/* 404 Fallback */}
           <Route path="*" element={<NotFoundPage />} />

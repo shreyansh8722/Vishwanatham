@@ -1,258 +1,177 @@
-import React, { useState, useEffect } from 'react';
-import { db } from '../lib/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, orderBy, query } from 'firebase/firestore';
-import { Plus, Trash2, Package, ShoppingBag, LayoutDashboard, Loader2, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  LayoutDashboard, ShoppingBag, Package, Users, 
+  MessageSquare, Layers, Tag, Settings, 
+  ChevronRight, Bell, Search, Menu, X, LogOut,
+  Palette, BarChart3, Globe
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth'; 
+
+// --- Import All Managers ---
+import { AdminDashboard } from '../components/admin/AdminDashboard';
+import { ProductManager } from '../components/admin/ProductManager';
+import { OrderManager } from '../components/admin/OrderManager';
+import { InventoryManager } from '../components/admin/InventoryManager';
+import { CustomerManager } from '../components/admin/CustomerManager'; // Fixed Import
+import { MessageInbox } from '../components/admin/MessageInbox';
+import { ContentManager } from '../components/admin/ContentManager';
+import { StorefrontManager } from '../components/admin/StorefrontManager';
+import { CouponManager } from '../components/admin/CouponManager';
+import { SettingsManager } from '../components/admin/SettingsManager';
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState('products'); // 'products', 'add', 'orders'
-  const [loading, setLoading] = useState(false);
-  const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { logout } = useAuth(); 
   const navigate = useNavigate();
 
-  // --- FORM STATE ---
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    price: '',
-    originalPrice: '',
-    category: 'Rudraksha',
-    description: '',
-    image: '', // URL input for simplicity
-    rating: '5.0'
-  });
-
-  // --- FETCH DATA ---
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // Fetch Products
-      const prodData = await getDocs(collection(db, "products"));
-      setProducts(prodData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-
-      // Fetch Orders (Mocking collection if empty)
-      const orderRef = collection(db, "orders");
-      const orderData = await getDocs(query(orderRef, orderBy('date', 'desc')));
-      setOrders(orderData.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    } catch (error) {
-      console.error("Error fetching data:", error);
+  const menuItems = [
+    {
+      category: "Overview",
+      items: [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      ]
+    },
+    {
+      category: "Store Management",
+      items: [
+        { id: 'orders', label: 'Orders', icon: ShoppingBag },
+        { id: 'products', label: 'Products', icon: Package },
+        { id: 'inventory', label: 'Inventory', icon: BarChart3 },
+      ]
+    },
+    {
+      category: "Customers",
+      items: [
+        { id: 'customers', label: 'Customers', icon: Users },
+        { id: 'inbox', label: 'Inbox', icon: MessageSquare },
+        { id: 'content', label: 'Reviews & FAQs', icon: Layers },
+      ]
+    },
+    {
+      category: "Marketing & Design",
+      items: [
+        { id: 'storefront', label: 'Online Store', icon: Palette },
+        { id: 'coupons', label: 'Discounts', icon: Tag },
+      ]
+    },
+    {
+      category: "System",
+      items: [
+        { id: 'settings', label: 'Settings', icon: Settings },
+      ]
     }
-    setLoading(false);
+  ];
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  // --- HANDLERS ---
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await addDoc(collection(db, "products"), {
-        ...newProduct,
-        price: Number(newProduct.price),
-        originalPrice: Number(newProduct.originalPrice),
-        images: [newProduct.image], // Wrapping in array to match structure
-        createdAt: new Date()
-      });
-      alert("Product Added Successfully!");
-      setNewProduct({ name: '', price: '', originalPrice: '', category: 'Rudraksha', description: '', image: '', rating: '5.0' });
-      fetchData(); // Refresh list
-      setActiveTab('products');
-    } catch (error) {
-      alert("Error adding product: " + error.message);
-    }
-    setLoading(false);
-  };
-
-  const handleDeleteProduct = async (id) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      await deleteDoc(doc(db, "products", id));
-      fetchData();
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard': return <AdminDashboard onChangeTab={setActiveTab} />;
+      case 'products': return <ProductManager />;
+      case 'orders': return <OrderManager />;
+      case 'inventory': return <InventoryManager />;
+      case 'customers': return <CustomerManager />;
+      case 'inbox': return <MessageInbox />;
+      case 'content': return <ContentManager />;
+      case 'storefront': return <StorefrontManager />;
+      case 'coupons': return <CouponManager />;
+      case 'settings': return <SettingsManager />;
+      default: return <AdminDashboard onChangeTab={setActiveTab} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-heritage-paper flex font-manrope">
+    <div className="min-h-screen bg-gray-50 flex font-manrope">
       
       {/* --- SIDEBAR --- */}
-      <aside className="w-64 bg-heritage-rudraksha text-white flex-shrink-0 hidden md:flex flex-col">
-        <div className="p-6 border-b border-white/10">
-          <h2 className="font-cinzel text-xl font-bold">Admin Panel</h2>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#1a1a1a] text-gray-400 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        
+        {/* Brand Header */}
+        <div className="h-16 flex items-center px-6 border-b border-gray-800 bg-[#1a1a1a]">
+           <Globe className="text-[#B08D55] mr-3" size={24} />
+           <span className="text-white font-serif font-bold text-lg tracking-wide">Vishwanatham</span>
+           <button onClick={() => setIsMobileMenuOpen(false)} className="ml-auto lg:hidden text-gray-400">
+             <X size={20} />
+           </button>
         </div>
-        <nav className="p-4 space-y-2">
-          <button 
-            onClick={() => setActiveTab('products')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded text-sm font-bold transition-all ${activeTab === 'products' ? 'bg-white text-heritage-rudraksha' : 'text-white/80 hover:bg-white/10'}`}
-          >
-            <Package size={18} /> All Products
-          </button>
-          <button 
-            onClick={() => setActiveTab('add')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded text-sm font-bold transition-all ${activeTab === 'add' ? 'bg-white text-heritage-rudraksha' : 'text-white/80 hover:bg-white/10'}`}
-          >
-            <Plus size={18} /> Add New Product
-          </button>
-          <button 
-            onClick={() => setActiveTab('orders')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded text-sm font-bold transition-all ${activeTab === 'orders' ? 'bg-white text-heritage-rudraksha' : 'text-white/80 hover:bg-white/10'}`}
-          >
-            <ShoppingBag size={18} /> Orders
-          </button>
+
+        {/* Navigation Links */}
+        <nav className="p-4 space-y-8 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar">
+          {menuItems.map((group, idx) => (
+            <div key={idx}>
+              <h4 className="px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">{group.category}</h4>
+              <ul className="space-y-1">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative
+                          ${isActive 
+                            ? 'bg-[#B08D55] text-white shadow-lg shadow-[#B08D55]/20' 
+                            : 'hover:bg-gray-800 hover:text-gray-100'
+                          }`}
+                      >
+                        <Icon size={18} className={isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-300'} />
+                        {item.label}
+                        {isActive && <ChevronRight size={14} className="absolute right-3 opacity-50" />}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+
+          <div className="pt-4 mt-4 border-t border-gray-800">
+            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors">
+              <LogOut size={18} /> Sign Out
+            </button>
+          </div>
         </nav>
       </aside>
 
       {/* --- MAIN CONTENT --- */}
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="font-cinzel text-3xl font-bold text-heritage-charcoal">Dashboard</h1>
-          <button onClick={fetchData} className="p-2 bg-white border border-heritage-mist rounded hover:bg-heritage-sand">
-            <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
-          </button>
-        </div>
-
-        {/* --- VIEW: ALL PRODUCTS --- */}
-        {activeTab === 'products' && (
-          <div className="bg-white border border-heritage-mist rounded-lg overflow-hidden shadow-sm">
-            <table className="w-full text-left">
-              <thead className="bg-heritage-sand text-heritage-charcoal font-cinzel text-sm border-b border-heritage-mist">
-                <tr>
-                  <th className="p-4">Image</th>
-                  <th className="p-4">Name</th>
-                  <th className="p-4">Price</th>
-                  <th className="p-4">Category</th>
-                  <th className="p-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-heritage-mist">
-                {products.map(product => (
-                  <tr key={product.id} className="hover:bg-heritage-paper/50">
-                    <td className="p-4">
-                      <img src={product.images?.[0] || product.image} alt="" className="w-10 h-10 rounded object-cover border border-heritage-mist" />
-                    </td>
-                    <td className="p-4 font-bold text-heritage-charcoal text-sm">{product.name}</td>
-                    <td className="p-4 text-sm">₹{product.price}</td>
-                    <td className="p-4 text-sm text-heritage-grey">{product.category}</td>
-                    <td className="p-4 text-right">
-                      <button 
-                        onClick={() => handleDeleteProduct(product.id)}
-                        className="text-red-600 hover:text-red-800 p-1"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {products.length === 0 && !loading && (
-              <div className="p-8 text-center text-heritage-grey">No products found. Add some!</div>
-            )}
-          </div>
-        )}
-
-        {/* --- VIEW: ADD PRODUCT --- */}
-        {activeTab === 'add' && (
-          <div className="max-w-2xl bg-white border border-heritage-mist rounded-lg p-8 shadow-sm">
-            <h2 className="font-cinzel text-xl font-bold text-heritage-charcoal mb-6">Add New Product</h2>
-            <form onSubmit={handleAddProduct} className="space-y-4">
-              
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-heritage-grey mb-1">Product Name</label>
-                <input 
-                  type="text" required
-                  value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})}
-                  className="w-full border border-heritage-mist rounded p-3 text-sm focus:border-heritage-rudraksha outline-none"
-                  placeholder="e.g. 5 Mukhi Rudraksha"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-heritage-grey mb-1">Price (₹)</label>
-                  <input 
-                    type="number" required
-                    value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})}
-                    className="w-full border border-heritage-mist rounded p-3 text-sm focus:border-heritage-rudraksha outline-none"
-                    placeholder="1200"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-heritage-grey mb-1">Original Price (₹)</label>
-                  <input 
-                    type="number" 
-                    value={newProduct.originalPrice} onChange={e => setNewProduct({...newProduct, originalPrice: e.target.value})}
-                    className="w-full border border-heritage-mist rounded p-3 text-sm focus:border-heritage-rudraksha outline-none"
-                    placeholder="2500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-heritage-grey mb-1">Category</label>
-                <select 
-                  value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}
-                  className="w-full border border-heritage-mist rounded p-3 text-sm focus:border-heritage-rudraksha outline-none"
-                >
-                  <option value="Rudraksha">Rudraksha</option>
-                  <option value="Gemstones">Gemstones</option>
-                  <option value="Yantras">Yantras</option>
-                  <option value="Malas">Malas</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-heritage-grey mb-1">Image URL</label>
-                <input 
-                  type="text" required
-                  value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})}
-                  className="w-full border border-heritage-mist rounded p-3 text-sm focus:border-heritage-rudraksha outline-none"
-                  placeholder="https://images.unsplash.com/..."
-                />
-                <p className="text-xs text-heritage-grey mt-1">Paste a link from Unsplash or your uploaded images.</p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-heritage-grey mb-1">Description</label>
-                <textarea 
-                  rows="4" required
-                  value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})}
-                  className="w-full border border-heritage-mist rounded p-3 text-sm focus:border-heritage-rudraksha outline-none"
-                  placeholder="Product details..."
-                />
-              </div>
-
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="w-full bg-heritage-rudraksha text-white py-3 rounded font-bold hover:bg-heritage-saffron transition-colors flex justify-center"
-              >
-                {loading ? <Loader2 className="animate-spin" /> : "Add Product to Live DB"}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
+           <div className="flex items-center gap-4">
+              <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-md">
+                 <Menu size={20} />
               </button>
-            </form>
-          </div>
-        )}
+              <h1 className="font-serif text-xl font-bold text-gray-900 capitalize">
+                {menuItems.flatMap(g => g.items).find(i => i.id === activeTab)?.label}
+              </h1>
+           </div>
+           <div className="flex items-center gap-4">
+              <button className="relative p-2 text-gray-400 hover:bg-gray-100 rounded-full transition-colors">
+                 <Bell size={20} />
+                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+              </button>
+              <div className="h-8 w-8 rounded-full bg-[#1a1a1a] text-[#B08D55] flex items-center justify-center font-bold text-xs border-2 border-gray-100">V</div>
+           </div>
+        </header>
 
-        {/* --- VIEW: ORDERS --- */}
-        {activeTab === 'orders' && (
-          <div className="bg-white border border-heritage-mist rounded-lg p-8 text-center">
-            {orders.length === 0 ? (
-              <div className="text-heritage-grey">
-                <ShoppingBag size={48} className="mx-auto mb-4 opacity-20" />
-                <h3 className="font-bold text-lg">No Orders Yet</h3>
-                <p>Orders placed on the Checkout page will appear here.</p>
-              </div>
-            ) : (
-              <div className="text-left space-y-4">
-                 {/* Logic to map orders would go here once we connect Checkout to Firebase */}
-                 <p>Orders loaded.</p>
-              </div>
-            )}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-50/50">
+          <div className="max-w-7xl mx-auto">
+             {renderContent()}
           </div>
-        )}
+        </main>
+      </div>
 
-      </main>
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
     </div>
   );
 };

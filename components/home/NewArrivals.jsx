@@ -1,76 +1,65 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { db } from '../../lib/firebase'; // Ensure this path is correct
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { ProductCard } from '../shop/ProductCard';
+import { Loader2 } from 'lucide-react';
 
-// Mock Data - "Japam" Style High-End Products
-const newArrivals = [
-  {
-    id: 1,
-    name: '5 Mukhi Rudraksha Mala',
-    price: 1250,
-    originalPrice: 2500,
-    images: [
-        'https://images.unsplash.com/photo-1603038930495-2c26279f6764?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1623151834261-24874f676239?auto=format&fit=crop&q=80&w=600'
-    ],
-    rating: 4.9,
-    reviews: 128
-  },
-  {
-    id: 2,
-    name: 'Amethyst Healing Bracelet',
-    price: 850,
-    originalPrice: 1500,
-    images: [
-        'https://images.unsplash.com/photo-1590424600100-3486df5b9745?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1610189012906-47833d772097?auto=format&fit=crop&q=80&w=600'
-    ],
-    rating: 4.8,
-    reviews: 95
-  },
-  {
-    id: 3,
-    name: 'Shri Yantra (Pure Copper)',
-    price: 3500,
-    originalPrice: 4200,
-    images: [
-        'https://images.unsplash.com/photo-1623151834261-24874f676239?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1603038930495-2c26279f6764?auto=format&fit=crop&q=80&w=600'
-    ],
-    rating: 5.0,
-    reviews: 42
-  },
-  {
-    id: 4,
-    name: '7 Chakra Stone Set',
-    price: 999,
-    originalPrice: 1999,
-    images: [
-        'https://images.unsplash.com/photo-1610189012906-47833d772097?auto=format&fit=crop&q=80&w=600',
-        'https://images.unsplash.com/photo-1567113300190-484852086433?auto=format&fit=crop&q=80&w=600'
-    ],
-    rating: 4.7,
-    reviews: 156
-  }
-];
-
-// NOTE: Using 'export const' to match the named import in HomePage.jsx
 export const NewArrivals = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNewArrivals = async () => {
+      try {
+        // Fetch 10 newest products
+        const q = query(
+          collection(db, 'products'), 
+          orderBy('createdAt', 'desc'), 
+          limit(10)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching new arrivals:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNewArrivals();
+  }, []);
+
+  if (loading) return <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-[#B08D55]" /></div>;
+
   return (
-    <section className="py-16 px-4 bg-heritage-paper">
+    // REMOVED: bg-heritage-paper / bg-[#fcfbf9]
+    <section className="py-12 px-4"> 
       <div className="max-w-7xl mx-auto">
-        {/* Minimal Header */}
-        <div className="text-center mb-10 animate-fade-up">
-          <h2 className="font-cinzel text-3xl font-bold text-heritage-charcoal mb-2">
+        {/* Header - REMOVED: "Fresh from holy city" text */}
+        <div className="text-center mb-8 animate-fade-up">
+          <h2 className="font-cinzel text-2xl font-bold text-[#1a1a1a] mb-2">
             New Arrivals
           </h2>
-          <div className="w-16 h-0.5 bg-heritage-rudraksha mx-auto rounded-full opacity-50"></div>
+          <div className="w-12 h-0.5 bg-[#B08D55] mx-auto rounded-full opacity-50"></div>
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 animate-fade-up" style={{animationDelay: '0.1s'}}>
-          {newArrivals.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 animate-fade-up">
+          {products.length > 0 ? (
+            products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          ) : (
+            <div className="col-span-full text-center text-gray-400 py-10">
+              No products found. Add some from Admin Panel.
+            </div>
+          )}
         </div>
       </div>
     </section>

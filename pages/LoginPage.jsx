@@ -8,8 +8,8 @@ import {
   sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase'; // Direct import
-import { useAuth } from '../hooks/useAuth';
+import { auth, db } from '../lib/firebase'; // Ensure this points to your lib/firebase.js
+import { useAuth } from '../hooks/useAuth'; // Use the hook to track auth state
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -27,12 +27,13 @@ export default function LoginPage() {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth(); // We only need 'user' from context
+  const { user } = useAuth(); //
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: zodResolver(loginSchema)
   });
 
+  // Redirect if user is already logged in
   useEffect(() => {
     if (user) {
         const from = location.state?.from || '/profile';
@@ -40,28 +41,29 @@ export default function LoginPage() {
     }
   }, [user, navigate, location]);
 
-  // --- THE FIX: Create User in Firestore ---
+  // --- THE FIX: Create User Collection Entry Automatically ---
   const ensureUserProfile = async (firebaseUser) => {
     if (!firebaseUser) return;
     
-    const userRef = doc(db, 'users', firebaseUser.uid);
+    const userRef = doc(db, 'users', firebaseUser.uid); //
     try {
       const docSnap = await getDoc(userRef);
       
       if (!docSnap.exists()) {
+        // Create the document if it doesn't exist
         await setDoc(userRef, {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           name: firebaseUser.displayName || 'Devotee',
-          role: 'user', // Default role. Change to 'admin' manually in Firebase Console.
+          role: 'user', // Default role; manually change to 'admin' in Console if needed
           favorites: [],
           cart: [],
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp() //
         });
-        console.log("User profile created in DB!");
+        console.log("User profile created in Firestore 'users' collection.");
       }
     } catch (e) {
-      console.error("Error creating user profile:", e);
+      console.error("Error ensuring user profile:", e);
     }
   };
 
@@ -71,12 +73,12 @@ export default function LoginPage() {
     try {
       let result;
       if (mode === 'login') {
-        result = await signInWithEmailAndPassword(auth, data.email, data.password);
+        result = await signInWithEmailAndPassword(auth, data.email, data.password); //
       } else {
-        result = await createUserWithEmailAndPassword(auth, data.email, data.password);
+        result = await createUserWithEmailAndPassword(auth, data.email, data.password); //
       }
       
-      // Force Database Creation
+      // Ensure the database record exists
       await ensureUserProfile(result.user);
       
     } catch (err) {
@@ -95,8 +97,8 @@ export default function LoginPage() {
     setError(null);
     try {
         const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        // Force Database Creation
+        const result = await signInWithPopup(auth, provider); //
+        // Ensure the database record exists
         await ensureUserProfile(result.user);
     } catch (err) {
         console.error(err);

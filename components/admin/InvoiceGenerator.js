@@ -1,71 +1,65 @@
-import { formatPrice } from '@/lib/utils';
+import { formatPrice } from '@/lib/utils'; // Assuming you have this helper, or remove it and use .toLocaleString()
 
-export const generateInvoice = async (order) => {
-  // Create a new window for the invoice
-  const printWindow = window.open('', 'PRINT', 'height=800,width=800');
-
+export const printInvoice = (order) => {
+  const printWindow = window.open('', '_blank');
+  
   if (!printWindow) {
-    alert('Please allow popups to print invoices');
+    alert("Please allow popups to print invoices");
     return;
   }
 
-  const date = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString() : new Date(order.createdAt).toLocaleDateString();
-  const orderId = order.id.slice(-6).toUpperCase();
+  const itemsHtml = order.items.map(item => `
+    <tr style="border-bottom: 1px solid #eee;">
+      <td style="padding: 10px; font-weight: 500;">${item.name} <br/> <span style="font-size: 12px; color: #666;">${item.selectedOptions?.size || 'Standard'}</span></td>
+      <td style="padding: 10px; text-align: center;">${item.quantity}</td>
+      <td style="padding: 10px; text-align: right;">₹${item.price}</td>
+      <td style="padding: 10px; text-align: right; font-weight: bold;">₹${item.price * item.quantity}</td>
+    </tr>
+  `).join('');
 
-  // HTML Template for the Invoice
-  printWindow.document.write(`
+  const htmlContent = `
+    <!DOCTYPE html>
     <html>
       <head>
-        <title>Invoice #${orderId}</title>
+        <title>Invoice #${order.id.slice(0, 8)}</title>
         <style>
-          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; max-width: 800px; margin: 0 auto; }
-          .header { display: flex; justify-content: space-between; margin-bottom: 40px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
-          .logo { font-size: 24px; font-weight: bold; font-style: italic; color: #1a1a1a; }
+          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; max-width: 800px; mx-auto; }
+          .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+          .logo { font-size: 24px; font-weight: bold; color: #B08D55; text-transform: uppercase; }
           .invoice-details { text-align: right; }
-          .invoice-title { font-size: 32px; font-weight: bold; color: #B08D55; margin-bottom: 5px; }
-          .grid { display: flex; justify-content: space-between; margin-bottom: 40px; }
-          .section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 10px; font-weight: bold; }
-          .address { font-size: 14px; line-height: 1.6; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+          .box { background: #f9f9f9; padding: 20px; border-radius: 8px; }
+          h3 { font-size: 12px; text-transform: uppercase; color: #999; margin: 0 0 10px 0; letter-spacing: 1px; }
+          p { margin: 0; font-size: 14px; line-height: 1.6; }
           table { w-full; width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-          th { text-align: left; padding: 12px 0; border-bottom: 1px solid #ddd; font-size: 12px; text-transform: uppercase; color: #666; }
-          td { padding: 12px 0; border-bottom: 1px solid #eee; font-size: 14px; }
-          .text-right { text-align: right; }
-          .total-section { display: flex; justify-content: flex-end; }
-          .total-box { width: 250px; }
-          .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
-          .grand-total { font-weight: bold; font-size: 18px; border-top: 2px solid #333; padding-top: 10px; margin-top: 10px; }
-          .footer { margin-top: 60px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; }
+          th { text-align: left; padding: 10px; border-bottom: 2px solid #eee; font-size: 12px; text-transform: uppercase; }
+          .totals { text-align: right; }
+          .total-row { display: flex; justify-content: flex-end; gap: 40px; padding: 5px 0; }
+          .grand-total { font-size: 18px; font-weight: bold; border-top: 2px solid #333; padding-top: 10px; margin-top: 10px; }
+          @media print { body { padding: 0; } }
         </style>
       </head>
       <body>
         <div class="header">
           <div class="logo">Pahnawa Banaras</div>
           <div class="invoice-details">
-            <div class="invoice-title">INVOICE</div>
-            <div>#${orderId}</div>
-            <div>Date: ${date}</div>
+            <h1>INVOICE</h1>
+            <p>#${order.id.slice(0, 8).toUpperCase()}</p>
+            <p>Date: ${order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString() : new Date().toLocaleDateString()}</p>
           </div>
         </div>
 
         <div class="grid">
-          <div>
-            <div class="section-title">Billed To</div>
-            <div class="address">
-              <strong>${order.shippingAddress?.fullName || 'Guest'}</strong><br>
-              ${order.shippingAddress?.addressLine1 || ''}<br>
-              ${order.shippingAddress?.city || ''}, ${order.shippingAddress?.state || ''}<br>
-              ${order.shippingAddress?.pincode || ''}<br>
-              Phone: ${order.shippingAddress?.phone || ''}
-            </div>
+          <div class="box">
+            <h3>Bill To</h3>
+            <p><strong>${order.shippingDetails?.firstName} ${order.shippingDetails?.lastName}</strong></p>
+            <p>${order.shippingDetails?.address}</p>
+            <p>${order.shippingDetails?.city}, ${order.shippingDetails?.state} - ${order.shippingDetails?.pincode}</p>
+            <p>${order.shippingDetails?.phone}</p>
           </div>
-          <div class="text-right">
-            <div class="section-title">Shipped From</div>
-            <div class="address">
-              <strong>Pahnawa Banaras</strong><br>
-              Varanasi, Uttar Pradesh<br>
-              India - 221001<br>
-              contact@pahnawabanaras.com
-            </div>
+          <div class="box">
+             <h3>Ship To</h3>
+             <p>Same as billing address</p>
           </div>
         </div>
 
@@ -73,56 +67,34 @@ export const generateInvoice = async (order) => {
           <thead>
             <tr>
               <th>Item</th>
-              <th>Quantity</th>
-              <th class="text-right">Price</th>
-              <th class="text-right">Total</th>
+              <th style="text-align: center;">Qty</th>
+              <th style="text-align: right;">Price</th>
+              <th style="text-align: right;">Amount</th>
             </tr>
           </thead>
           <tbody>
-            ${order.items.map(item => `
-              <tr>
-                <td>
-                  <strong>${item.name}</strong>
-                  ${item.selectedSize ? `<br><span style="font-size:11px; color:#888">Size: ${item.selectedSize}</span>` : ''}
-                </td>
-                <td>${item.quantity}</td>
-                <td class="text-right">₹${formatPrice(item.price)}</td>
-                <td class="text-right">₹${formatPrice(item.price * item.quantity)}</td>
-              </tr>
-            `).join('')}
+            ${itemsHtml}
           </tbody>
         </table>
 
-        <div class="total-section">
-          <div class="total-box">
-            <div class="row">
-              <span>Subtotal:</span>
-              <span>₹${formatPrice(order.subtotal || order.total)}</span>
-            </div>
-            <div class="row">
-              <span>Shipping:</span>
-              <span>${order.shipping === 0 ? 'Free' : '₹' + order.shipping}</span>
-            </div>
-            <div class="row grand-total">
-              <span>Total:</span>
-              <span>₹${formatPrice(order.total)}</span>
-            </div>
-          </div>
+        <div class="totals">
+          <div class="total-row"><span>Subtotal:</span> <span>₹${order.totalAmount}</span></div>
+          <div class="total-row"><span>Shipping:</span> <span>₹0.00</span></div>
+          <div class="total-row grand-total"><span>Total:</span> <span>₹${order.totalAmount}</span></div>
         </div>
 
-        <div class="footer">
-          <p>Thank you for shopping with Pahnawa Banaras. This is a computer-generated invoice.</p>
+        <div style="margin-top: 50px; text-align: center; color: #999; font-size: 12px;">
+          <p>Thank you for shopping with Pahnawa Banaras.</p>
+          <p>For support, email hello@pahnawa.com</p>
         </div>
+        
+        <script>
+          window.onload = function() { window.print(); }
+        </script>
       </body>
     </html>
-  `);
+  `;
 
-  printWindow.document.close(); // Necessary for IE >= 10
-  printWindow.focus(); // Necessary for IE >= 10
-
-  // Wait for images/styles to load then print
-  setTimeout(() => {
-    printWindow.print();
-    printWindow.close();
-  }, 250);
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
 };
