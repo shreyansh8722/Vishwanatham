@@ -29,12 +29,13 @@ import TermsPage from './pages/TermsPage';
 import ReturnPolicy from './pages/ReturnPolicy';
 import AdminPage from './pages/AdminPage';
 
-// Auth Protection (Ensure you have updated ProtectedRoute.jsx to export AdminRoute)
+// Auth Protection
 import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
 
 function App() {
   return (
-    <div className="flex flex-col min-h-screen bg-heritage-paper text-heritage-grey font-montserrat">
+    // UPDATED: Using 'font-body' for the global font application
+    <div className="flex flex-col min-h-screen bg-heritage-paper text-heritage-grey font-body">
       <ScrollToTop />
       
       {/* Global Modals */}
@@ -74,7 +75,7 @@ function App() {
              <Route path="/favorites" element={<FavoritesPage />} />
           </Route>
 
-          {/* Admin Routes (Secured specifically for Admin accounts) */}
+          {/* Admin Routes */}
           <Route element={<AdminRoute />}>
             <Route path="/admin/*" element={<AdminPage />} />
           </Route>

@@ -12,41 +12,50 @@ const HomePage = () => {
         description="Buy original Rudraksha, Gemstones, and Yantras energized in Kashi."
       />
 
-      {/* 1. HERO SLIDESHOW (Dark Coffee & Gold Theme) */}
+      {/* 1. HERO SLIDESHOW */}
       <Hero />
 
-      {/* 2. CATEGORIES (Quick Navigation) */}
+      {/* 2. CATEGORIES */}
       <CategoryRow />
 
-      {/* 3. LATEST COLLECTION (Product Cards Only) */}
+      {/* 3. LATEST COLLECTION */}
       <NewArrivals />
 
-      {/* 4. FEATURED BANNER (Minimalist & Aesthetic) */}
-      <section className="py-16 px-4 border-b border-heritage-mist">
+      {/* 4. FEATURED BANNER - "The Temple Collection" */}
+      <section className="py-20 px-4 border-b border-heritage-mist bg-white">
         <div className="container mx-auto">
-          <div className="relative w-full h-[50vh] md:h-[60vh] overflow-hidden rounded-lg group cursor-pointer">
-            {/* Image */}
+          <div className="relative w-full h-[55vh] md:h-[65vh] overflow-hidden group cursor-pointer">
+            {/* Image - Darkened for text readability */}
             <img 
               src="https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?q=80&w=1600" 
               alt="Premium Collection" 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
             />
             
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-500" />
+            {/* Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500" />
             
-            {/* Content - No Caps, Dark Coffee Theme */}
+            {/* Content - Heritage Luxury Style */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-6">
-               <span className="text-sm font-medium mb-4 bg-heritage-rudraksha/90 px-4 py-1 rounded text-white backdrop-blur-sm">
-                 Limited edition
+               
+               {/* Badge */}
+               <span className="text-xs font-bold font-body tracking-[0.15em] mb-4 bg-heritage-rudraksha text-white px-4 py-1.5 uppercase backdrop-blur-md">
+                 Limited Edition
                </span>
                
-               <h2 className="font-cinzel text-4xl md:text-6xl mb-8 font-bold drop-shadow-lg">
-                 The temple collection
+               {/* Heading - Serif */}
+               <h2 className="font-heading text-5xl md:text-7xl mb-6 font-medium drop-shadow-xl tracking-tight">
+                 The Temple Collection
                </h2>
                
-               <button className="bg-white text-heritage-rudraksha px-8 py-3 text-sm font-bold rounded hover:bg-heritage-saffron hover:text-white transition-all shadow-xl">
-                 Explore now
+               {/* Subtext */}
+               <p className="font-body text-white/90 max-w-md mb-8 text-sm md:text-base font-medium">
+                 Hand-selected artifacts energized in the sanctum of Kashi Vishwanath.
+               </p>
+               
+               {/* Button - Sans Serif & Functional */}
+               <button className="bg-white text-heritage-rudraksha px-10 py-3.5 text-xs font-bold font-body uppercase tracking-[0.2em] hover:bg-heritage-gold hover:text-white transition-all shadow-2xl">
+                 Explore Now
                </button>
             </div>
           </div>

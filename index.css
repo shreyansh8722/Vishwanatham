@@ -1,24 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  /* Fonts */
-  --font-cinzel: "Montserrat", sans-serif;   
-  --font-manrope: "Inter", sans-serif;       
+  /* --- FONTS: Montserrat & Inter (As Requested) --- */
+  --font-heading: "Montserrat", sans-serif;
+  --font-body: "Inter", sans-serif;
+  
+  /* Compatibility Mappings */
+  --font-cinzel: var(--font-heading);
+  --font-manrope: var(--font-body);
+  --font-montserrat: var(--font-heading);
 
-  /* Colors */
-  --color-heritage-paper: #FFFFFF;
-  --color-heritage-sand: #FAFAFA;
-  --color-heritage-mist: #E5E7EB;
-  --color-heritage-charcoal: #000000;
-  --color-heritage-grey: #4B5563;
-  --color-heritage-rudraksha: #2C1810;
-  --color-heritage-saffron: #F2C75C;
-  --color-heritage-gold: #F2C75C;
+  /* --- COLORS: Updated Background to Warm Alabaster --- */
+  --color-heritage-paper: #FDFCF8;      /* UPDATED: Warm Alabaster */
+  --color-heritage-sand: #F8F9FA;
+  --color-heritage-mist: #E2E8F0;
+  --color-heritage-charcoal: #1A202C;
+  --color-heritage-grey: #4A5568;
+  --color-heritage-rudraksha: #8B4513;
+  --color-heritage-saffron: #D69E2E;
+  --color-heritage-gold: #B7791F;
+  --color-heritage-green: #2F855A;
 
-  /* --- ANIMATION FIX: Made fast (0.3s) for "Instant" feel --- */
+  /* --- ANIMATIONS: Snappy (0.3s) --- */
   --animate-fade-up: fadeUp 0.3s ease-out forwards;
-  --animate-fade-in: fadeIn 0.2s ease-out forwards;
+  --animate-fade-in: fadeIn 0.3s ease-out forwards;
   
   @keyframes fadeUp { 
     from { opacity: 0; transform: translateY(10px); } 
@@ -32,37 +38,49 @@
 
 @layer base {
   html { 
-    /* REMOVED scroll-behavior: smooth; <- This was causing the laggy page changes */
     overflow-x: hidden; 
     width: 100%; 
+    scroll-behavior: auto !important; /* Instant transitions */
   }
 
   body {
     background-color: var(--color-heritage-paper);
     color: var(--color-heritage-charcoal);
-    font-family: var(--font-manrope);
+    font-family: var(--font-body); /* Uses Inter */
     -webkit-font-smoothing: antialiased;
-    width: 100%;
+    line-height: 1.6;
   }
 
-  h1, h2, h3, h4, h5, h6, button, a, span, p, div {
-    text-transform: none !important; 
+  /* Force "Sentence case" everywhere */
+  *, ::before, ::after {
+    text-transform: none !important;
   }
 
+  /* Headings use Montserrat */
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-cinzel);
-    font-weight: 600;
+    font-family: var(--font-heading);
+    font-weight: 700; 
     color: var(--color-heritage-charcoal);
-    letter-spacing: -0.02em; 
+    letter-spacing: -0.02em; /* Tight & Modern */
+    line-height: 1.2;
   }
 
-  button {
-    font-family: var(--font-cinzel); 
-    font-weight: 600; 
-    border-radius: 4px;
+  /* Buttons & UI -> Uses Inter */
+  button, input, select, a, span, p, div {
+    font-family: var(--font-body);
+  }
+  
+  /* Bold text should be truly bold */
+  b, strong {
+    font-weight: 600;
   }
 }
 
 /* Utilities */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+::selection {
+  background-color: var(--color-heritage-rudraksha);
+  color: #fff;
+}
