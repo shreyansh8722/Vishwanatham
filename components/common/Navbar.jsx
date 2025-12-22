@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingBag, Search, ChevronDown, User, Menu, X } from 'lucide-react'; // Removed Heart
+import { ShoppingBag, Search, ChevronDown, User, Menu, X } from 'lucide-react'; 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -7,7 +7,6 @@ import BrandLogo from './BrandLogo';
 import NewsletterPopup from './NewsletterPopup';
 import { useAuth } from '../../hooks/useAuth';
 import { useCart } from '../../context/CartContext';
-// Removed useFavorites import
 
 const navItems = [
   { 
@@ -49,7 +48,6 @@ export const Navbar = () => {
 
   const { user } = useAuth();
   const { cartItems, setIsCartOpen } = useCart();
-  // Removed favorites hook usage
   const location = useLocation();
   const navigate = useNavigate();
   const cartItemCount = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
@@ -112,7 +110,8 @@ export const Navbar = () => {
       </div>
 
       {/* 2. MAIN HEADER (Sticky) */}
-      <nav className="sticky top-0 bg-white border-b border-gray-100 z-[140] shadow-sm">
+      {/* CHANGE: Changed bg-white to bg-heritage-paper and border-gray-100 to border-heritage-mist */}
+      <nav className="sticky top-0 bg-heritage-paper border-b border-heritage-mist z-[140] shadow-sm transition-colors duration-300">
         
         {/* TOP ROW: Logo, Search, Cart */}
         <div className="container mx-auto px-4 md:px-8">
@@ -176,7 +175,7 @@ export const Navbar = () => {
               </Link>
             </div>
 
-            {/* RIGHT: User Actions (Removed Heart) */}
+            {/* RIGHT: User Actions */}
             <div className="w-1/3 flex items-center justify-end gap-5">
               <Link to={user ? "/profile" : "/login"} className="text-heritage-charcoal hover:text-heritage-rudraksha transition-colors">
                 <User className="w-6 h-6" strokeWidth={1.5} />
@@ -195,7 +194,8 @@ export const Navbar = () => {
 
         {/* 3. NAVIGATION & MEGA MENU CONTAINER */}
         <div 
-          className="hidden md:block border-t border-gray-100 relative"
+          // CHANGE: Changed border-gray-100 to border-heritage-mist
+          className="hidden md:block border-t border-heritage-mist relative"
           onMouseLeave={() => setHoveredIndex(null)}
         >
           <div className="container mx-auto flex justify-center">
@@ -230,7 +230,8 @@ export const Navbar = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 5 }}
                 transition={{ duration: 0.2 }}
-                className="absolute left-0 top-full w-full bg-white border-t border-heritage-mist shadow-xl z-[145]"
+                // CHANGE: Use bg-heritage-paper to match navbar
+                className="absolute left-0 top-full w-full bg-heritage-paper border-t border-heritage-mist shadow-xl z-[145]"
                 onMouseEnter={() => {}} 
               >
                 <div className="py-8">
@@ -280,6 +281,7 @@ export const Navbar = () => {
             />
             <motion.div 
               initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+              // CHANGE: Changed bg-white to bg-heritage-paper
               className="fixed top-0 left-0 h-full w-[80%] max-w-sm bg-heritage-paper z-[200] shadow-2xl overflow-y-auto md:hidden"
             >
               <div className="p-6">

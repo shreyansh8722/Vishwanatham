@@ -1,64 +1,103 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Scroll, Loader2 } from 'lucide-react';
 import SEO from '../components/SEO';
 import Hero from '../components/home/Hero';
 import { CategoryRow } from '../components/home/CategoryRow'; 
-import { NewArrivals } from '../components/home/NewArrivals';
+import ProductCard from '../components/shop/ProductCard';
+import { useProducts } from '../context/ProductContext';
+import IntentionGrid from '../components/home/IntentionGrid';
+import TestimonialSlider from '../components/home/TestimonialSlider';
 
 const HomePage = () => {
+  const { products, loading } = useProducts();
+  
+  // Get first 4 products for New Arrivals
+  const newArrivals = products.slice(0, 4);
+
   return (
-    <div className="bg-heritage-paper min-h-screen">
+    <div className="bg-heritage-paper min-h-screen font-manrope text-heritage-charcoal">
       <SEO 
         title="Vishwanatham | Authentic Spiritual Heritage of Kashi" 
         description="Buy original Rudraksha, Gemstones, and Yantras energized in Kashi."
       />
 
-      {/* 1. HERO SLIDESHOW */}
+      {/* 1. HERO */}
       <Hero />
 
       {/* 2. CATEGORIES */}
       <CategoryRow />
 
-      {/* 3. LATEST COLLECTION */}
-      <NewArrivals />
-
-      {/* 4. FEATURED BANNER - "The Temple Collection" */}
-      <section className="py-20 px-4 border-b border-heritage-mist bg-white">
-        <div className="container mx-auto">
-          <div className="relative w-full h-[55vh] md:h-[65vh] overflow-hidden group cursor-pointer">
-            {/* Image - Darkened for text readability */}
-            <img 
-              src="https://images.unsplash.com/photo-1620766182966-c6eb5ed2b788?q=80&w=1600" 
-              alt="Premium Collection" 
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-            />
-            
-            {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500" />
-            
-            {/* Content - Heritage Luxury Style */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-6">
-               
-               {/* Badge */}
-               <span className="text-xs font-bold font-body tracking-[0.15em] mb-4 bg-heritage-rudraksha text-white px-4 py-1.5 uppercase backdrop-blur-md">
-                 Limited Edition
-               </span>
-               
-               {/* Heading - Serif */}
-               <h2 className="font-heading text-5xl md:text-7xl mb-6 font-medium drop-shadow-xl tracking-tight">
-                 The Temple Collection
-               </h2>
-               
-               {/* Subtext */}
-               <p className="font-body text-white/90 max-w-md mb-8 text-sm md:text-base font-medium">
-                 Hand-selected artifacts energized in the sanctum of Kashi Vishwanath.
-               </p>
-               
-               {/* Button - Sans Serif & Functional */}
-               <button className="bg-white text-heritage-rudraksha px-10 py-3.5 text-xs font-bold font-body uppercase tracking-[0.2em] hover:bg-heritage-gold hover:text-white transition-all shadow-2xl">
-                 Explore Now
-               </button>
-            </div>
+      {/* 3. NEW ARRIVALS */}
+      <section className="py-20 container mx-auto px-4 md:px-8 bg-heritage-paper">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4 animate-fade-up">
+          <div>
+            <span className="text-heritage-rudraksha text-xs font-bold uppercase tracking-[0.2em] mb-2 block">
+              Fresh from Varanasi
+            </span>
+            <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-heritage-charcoal">
+              New Arrivals
+            </h2>
           </div>
+          
+          <Link 
+            to="/shop" 
+            className="group flex items-center gap-2 text-sm font-bold text-heritage-rudraksha hover:text-heritage-gold transition-colors pb-1 border-b border-transparent hover:border-heritage-gold"
+          >
+            View All Artifacts 
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        {loading ? (
+           <div className="flex justify-center py-20">
+             <Loader2 className="animate-spin text-heritage-rudraksha" size={40} />
+           </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10">
+            {newArrivals.length > 0 ? (
+              newArrivals.map((product) => (
+                <div key={product.id} className="animate-fade-up">
+                  <ProductCard product={product} />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-20 bg-heritage-sand rounded-xl border border-dashed border-heritage-mist">
+                <p className="text-heritage-grey font-cinzel">New spiritual treasures are arriving soon...</p>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* 4. INTENTION GRID (Moved Here) */}
+      <IntentionGrid />
+
+      {/* 5. TESTIMONIALS */}
+      <TestimonialSlider />
+
+      {/* 6. NEWSLETTER */}
+      <section className="py-20 bg-heritage-paper border-t border-heritage-mist">
+        <div className="container mx-auto px-4 max-w-3xl text-center">
+          <span className="inline-block p-3 rounded-full bg-heritage-sand text-heritage-rudraksha mb-6 shadow-sm border border-heritage-mist">
+            <Scroll size={24} />
+          </span>
+          <h2 className="font-cinzel text-3xl font-bold text-heritage-charcoal mb-4">
+            Join the Spiritual Journey
+          </h2>
+          <p className="text-heritage-grey mb-8 font-manrope">
+            Subscribe to receive insights on Vedic astrology, auspicious dates, and exclusive offers.
+          </p>
+          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
+            <input 
+              type="email" 
+              placeholder="Enter your email address" 
+              className="flex-1 px-4 py-3 border border-heritage-mist rounded-lg focus:outline-none focus:border-heritage-rudraksha bg-white placeholder:text-gray-400"
+            />
+            <button className="px-6 py-3 bg-heritage-rudraksha text-white font-bold rounded-lg hover:bg-heritage-charcoal transition-colors shadow-lg uppercase text-xs tracking-wider">
+              Subscribe
+            </button>
+          </form>
         </div>
       </section>
       

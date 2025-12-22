@@ -1,50 +1,61 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Heart, Zap, Banknote, Shield, Brain } from 'lucide-react';
+import { Sparkles, Heart, Zap, Banknote, Shield, Brain, ArrowRight } from 'lucide-react';
 
 export const IntentionGrid = () => {
   const navigate = useNavigate();
 
   const intentions = [
-    { id: 'wealth', label: 'Attract Wealth', icon: <Banknote size={24} />, color: 'text-green-400', desc: 'Citrine & Kuber Yantras' },
-    { id: 'love', label: 'Love & Harmony', icon: <Heart size={24} />, color: 'text-pink-400', desc: 'Rose Quartz & Gauri Shankar' },
-    { id: 'peace', label: 'Mental Peace', icon: <Sparkles size={24} />, color: 'text-blue-300', desc: '5 Mukhi & Amethyst' },
-    { id: 'protection', label: 'Evil Eye Protection', icon: <Shield size={24} />, color: 'text-red-400', desc: 'Black Tourmaline & Baglamukhi' },
-    { id: 'focus', label: 'Exam Focus', icon: <Brain size={24} />, color: 'text-yellow-400', desc: 'Saraswati Yantra & Fluorite' },
-    { id: 'health', label: 'Vitality', icon: <Zap size={24} />, color: 'text-orange-400', desc: 'Sunstone & Surya Yantra' },
+    { id: 'wealth', label: 'Wealth & Prosperity', icon: <Banknote size={24} />, desc: 'Citrine, Kuber Yantras' },
+    { id: 'love', label: 'Love & Harmony', icon: <Heart size={24} />, desc: 'Rose Quartz, Gauri Shankar' },
+    { id: 'peace', label: 'Mental Peace', icon: <Sparkles size={24} />, desc: '5 Mukhi, Amethyst' },
+    { id: 'protection', label: 'Protection', icon: <Shield size={24} />, desc: 'Black Tourmaline, Baglamukhi' },
+    { id: 'focus', label: 'Wisdom & Focus', icon: <Brain size={24} />, desc: 'Saraswati Yantra, Fluorite' },
+    { id: 'health', label: 'Health & Vitality', icon: <Zap size={24} />, desc: 'Sunstone, Surya Yantra' },
   ];
 
   return (
-    <section className="py-20 px-6 bg-ash-grey">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12 space-y-4">
-          <span className="text-vedic-gold font-bold tracking-[0.3em] uppercase text-xs">Shop by Sankalpa</span>
-          <h2 className="text-3xl md:text-5xl text-white">What do you seek?</h2>
+    <section className="py-20 px-4 md:px-8 bg-heritage-sand">
+      <div className="container mx-auto">
+        
+        {/* Header */}
+        <div className="text-center mb-12 animate-fade-up">
+          <span className="text-heritage-rudraksha font-bold tracking-[0.2em] uppercase text-xs font-manrope block mb-3">
+            Shop by Sankalpa
+          </span>
+          <h2 className="font-cinzel text-3xl md:text-5xl text-heritage-charcoal font-medium">
+            What do you seek?
+          </h2>
+          <div className="w-24 h-0.5 bg-heritage-rudraksha/20 mx-auto mt-6 rounded-full"></div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {intentions.map((item) => (
+        {/* Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {intentions.map((item, idx) => (
             <div 
               key={item.id}
               onClick={() => navigate(`/shop?intention=${item.id}`)}
-              className="group relative h-40 md:h-48 glass-card rounded-sm p-6 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-white/5 transition-all duration-300 overflow-hidden"
+              className="group bg-white rounded-xl p-8 border border-heritage-mist hover:border-heritage-rudraksha/30 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden animate-fade-up"
+              style={{ animationDelay: `${idx * 0.1}s` }}
             >
-              {/* Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-vedic-gold/0 to-vedic-gold/0 group-hover:to-vedic-gold/10 transition-all duration-500" />
-              
-              <div className={`p-3 rounded-full bg-black/40 ${item.color} group-hover:scale-110 transition-transform duration-300 ring-1 ring-white/10 group-hover:ring-vedic-gold/50`}>
-                {item.icon}
+              <div className="flex items-start justify-between mb-6">
+                <div className="p-3.5 rounded-full bg-heritage-sand text-heritage-rudraksha group-hover:bg-heritage-rudraksha group-hover:text-white transition-colors duration-300">
+                  {item.icon}
+                </div>
+                <ArrowRight className="w-5 h-5 text-heritage-mist group-hover:text-heritage-rudraksha group-hover:translate-x-1 transition-all" />
               </div>
               
-              <div className="text-center relative z-10">
-                <h3 className="font-cinzel text-lg md:text-xl text-white group-hover:text-vedic-gold transition-colors">{item.label}</h3>
-                <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
-                  {item.desc}
-                </p>
-              </div>
+              <h3 className="font-cinzel text-xl font-bold text-heritage-charcoal group-hover:text-heritage-rudraksha transition-colors mb-2">
+                {item.label}
+              </h3>
+              
+              <p className="font-manrope text-sm text-heritage-grey group-hover:text-heritage-charcoal/80">
+                {item.desc}
+              </p>
             </div>
           ))}
         </div>
+        
       </div>
     </section>
   );

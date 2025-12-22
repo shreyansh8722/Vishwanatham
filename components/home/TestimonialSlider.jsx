@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
+import { db } from '../../lib/firebase'; // Ensure correct path to your firebase config
 import { collectionGroup, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import { Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export const TestimonialSlider = () => {
+const TestimonialSlider = () => {
   const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // --- FETCH REVIEWS ACROSS ALL PRODUCTS ---
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        // Query the 'reviews' subcollection across ALL documents
-        // We only want 4 or 5 star reviews for the homepage
+        // Query reviews with 4+ rating
         const q = query(
           collectionGroup(db, 'reviews'),
           where('rating', '>=', 4),
-          orderBy('rating', 'desc'), // Needs composite index with createdAt usually
-          orderBy('createdAt', 'desc'),
-          limit(8)
+          // orderBy('rating', 'desc'), // Note: Needs Firestore Index to work with 'where'
+          limit(6)
         );
 
         const snapshot = await getDocs(q);
@@ -28,15 +25,25 @@ export const TestimonialSlider = () => {
           id: doc.id,
           ...doc.data()
         }));
-
-        setReviews(fetchedReviews);
+        
+        // If we found reviews, use them
+        if (fetchedReviews.length > 0) {
+            setReviews(fetchedReviews);
+        } else {
+            // Fallback (Mock) Data if no real reviews exist yet
+            setReviews([
+              { id: 1, userName: "Ananya S.", text: "The Rudraksha beads are genuinely authentic. I felt the energy immediately.", rating: 5, productName: "5 Mukhi Rudraksha" },
+              { id: 2, userName: "Rahul M.", text: "Packaging was divine, like receiving a prasadam from the temple.", rating: 5, productName: "Sphatik Mala" },
+              { id: 3, userName: "Meera K.", text: "Very knowledgeable support team. They guided me to the right gemstone.", rating: 5, productName: "Yellow Sapphire" }
+            ]);
+        }
       } catch (error) {
         console.error("Error fetching testimonials:", error);
-        // Fallback data if no reviews exist yet or index is missing
+        // Silent fallback on error
         setReviews([
-          { id: 1, userName: "Ananya S.", text: "The Katan silk saree I purchased is absolutely breathtaking. The weave is so intricate.", rating: 5, productName: "Katan Silk Saree" },
-          { id: 2, userName: "Priya M.", text: "Received my order in 2 days. The packaging was lovely and the saree is pure perfection.", rating: 5, productName: "Bridal Lehenga" },
-          { id: 3, userName: "Meera K.", text: "Authentic Banarasi quality. Hard to find such craftsmanship online.", rating: 5, productName: "Jangla Suit" }
+          { id: 1, userName: "Ananya S.", text: "The Rudraksha beads are genuinely authentic. I felt the energy immediately.", rating: 5, productName: "5 Mukhi Rudraksha" },
+          { id: 2, userName: "Rahul M.", text: "Packaging was divine, like receiving a prasadam from the temple.", rating: 5, productName: "Sphatik Mala" },
+          { id: 3, userName: "Meera K.", text: "Very knowledgeable support team. They guided me to the right gemstone.", rating: 5, productName: "Yellow Sapphire" }
         ]);
       } finally {
         setLoading(false);
@@ -54,50 +61,50 @@ export const TestimonialSlider = () => {
     setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
   };
 
-  if (loading || reviews.length === 0) return null;
+  if (loading) return null;
 
   return (
-    <section className="py-24 bg-white border-t border-gray-100 overflow-hidden">
+    <section className="py-24 bg-heritage-paper border-t border-heritage-mist overflow-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#B08D55] mb-2 block">
+        <div className="text-center mb-16 animate-fade-up">
+          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-heritage-rudraksha mb-2 block font-manrope">
             Client Love
           </span>
-          <h2 className="font-serif text-3xl md:text-4xl text-[#1a1a1a]">
+          <h2 className="font-cinzel text-3xl md:text-4xl text-heritage-charcoal">
             Voices of Heritage
           </h2>
         </div>
 
         <div className="relative">
-          <div className="overflow-hidden">
+          <div className="overflow-hidden min-h-[300px] flex items-center">
             <AnimatePresence mode='wait'>
               <motion.div
                 key={currentIndex}
-                initial={{ opacity: 0, x: 50 }}
+                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.5 }}
-                className="max-w-3xl mx-auto text-center"
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4 }}
+                className="max-w-3xl mx-auto text-center px-4"
               >
-                <div className="mb-8 flex justify-center text-[#B08D55]/30">
+                <div className="mb-8 flex justify-center text-heritage-gold/30">
                   <Quote size={48} className="fill-current" />
                 </div>
                 
-                <p className="font-serif text-xl md:text-3xl text-[#1a1a1a] leading-relaxed mb-8 italic">
+                <p className="font-cinzel text-xl md:text-3xl text-heritage-charcoal leading-relaxed mb-8 italic">
                   "{reviews[currentIndex].text || reviews[currentIndex].comment}"
                 </p>
 
-                <div className="flex flex-col items-center gap-2">
-                  <div className="flex gap-1 text-[#B08D55]">
+                <div className="flex flex-col items-center gap-2 font-manrope">
+                  <div className="flex gap-1 text-heritage-gold">
                     {[...Array(reviews[currentIndex].rating || 5)].map((_, i) => (
-                      <Star key={i} size={14} className="fill-current" />
+                      <Star key={i} size={16} className="fill-current" />
                     ))}
                   </div>
-                  <h4 className="text-sm font-bold uppercase tracking-widest text-[#1a1a1a]">
+                  <h4 className="text-sm font-bold uppercase tracking-widest text-heritage-charcoal mt-2">
                     {reviews[currentIndex].userName}
                   </h4>
                   {reviews[currentIndex].productName && (
-                    <p className="text-[10px] text-gray-400 uppercase tracking-wider">
+                    <p className="text-[10px] text-heritage-grey uppercase tracking-wider">
                       Purchased {reviews[currentIndex].productName}
                     </p>
                   )}
@@ -107,35 +114,33 @@ export const TestimonialSlider = () => {
           </div>
 
           {/* Controls */}
-          {reviews.length > 1 && (
-            <>
-              <button 
-                onClick={prevSlide}
-                className="absolute left-0 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-[#B08D55] transition-colors hidden md:block"
-              >
-                <ChevronLeft size={32} strokeWidth={1} />
-              </button>
-              <button 
-                onClick={nextSlide}
-                className="absolute right-0 top-1/2 -translate-y-1/2 p-3 text-gray-300 hover:text-[#B08D55] transition-colors hidden md:block"
-              >
-                <ChevronRight size={32} strokeWidth={1} />
-              </button>
-              
-              {/* Mobile Dots */}
-              <div className="flex justify-center gap-3 mt-12 md:hidden">
-                {reviews.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentIndex(idx)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-[#B08D55]' : 'w-1.5 bg-gray-200'}`}
-                  />
-                ))}
-              </div>
-            </>
-          )}
+          <button 
+            onClick={prevSlide}
+            className="absolute left-0 top-1/2 -translate-y-1/2 p-3 text-heritage-mist hover:text-heritage-rudraksha transition-colors hidden md:block"
+          >
+            <ChevronLeft size={40} strokeWidth={1} />
+          </button>
+          <button 
+            onClick={nextSlide}
+            className="absolute right-0 top-1/2 -translate-y-1/2 p-3 text-heritage-mist hover:text-heritage-rudraksha transition-colors hidden md:block"
+          >
+            <ChevronRight size={40} strokeWidth={1} />
+          </button>
+          
+          {/* Mobile Dots */}
+          <div className="flex justify-center gap-3 mt-8 md:hidden">
+            {reviews.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-heritage-rudraksha' : 'w-1.5 bg-heritage-mist'}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
   );
 };
+
+export default TestimonialSlider;

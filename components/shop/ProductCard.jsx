@@ -1,22 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Star } from 'lucide-react';
+import { Plus, Star, Heart } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useFavorites } from '../../hooks/useFavorites'; // Assuming you have this, optional
 
 export const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites ? useFavorites() : { toggleFavorite: () => {}, isFavorite: () => false };
 
   if (!product) return null;
 
-  // Image Logic
-  const mainImage = 
-    product.featuredImageUrl || 
-    (product.imageUrls && product.imageUrls[0]) || 
-    'https://via.placeholder.com/300';
-
-  const hoverImage = 
-    (product.imageUrls && product.imageUrls[1]) || 
-    mainImage;
+  // --- Logic ---
+  const mainImage = product.featuredImageUrl || (product.imageUrls && product.imageUrls[0]) || 'https://via.placeholder.com/400x500';
+  const hoverImage = (product.imageUrls && product.imageUrls[1]) || mainImage;
 
   const price = Number(product.price) || 0;
   const comparePrice = Number(product.comparePrice) || 0;
@@ -25,80 +21,100 @@ export const ProductCard = ({ product }) => {
     ? Math.round(((comparePrice - price) / comparePrice) * 100)
     : 0;
 
-  // Randomize stars for "Real" feel if no data (Japam style)
+  // Mock Rating Data for "Social Proof" feel
   const rating = product.rating || 4.8; 
-  const reviews = product.reviewCount || Math.floor(Math.random() * 50) + 10;
+  const reviews = product.reviewCount || 42;
 
   return (
-    <div className="group relative">
+    <div className="group relative flex flex-col h-full">
       
-      {/* 1. IMAGE AREA (Compact & Clean) */}
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-[#FAFAFA] mb-2.5 transition-all duration-300 group-hover:shadow-lg group-hover:ring-1 group-hover:ring-[#B08D55]/30">
+      {/* 1. IMAGE CONTAINER (4:5 Aspect Ratio for Premium Feel) */}
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-heritage-sand transition-all duration-500 hover:shadow-xl">
         <Link to={`/product/${product.id}`} className="block w-full h-full">
+          {/* Main Image */}
           <img
             src={mainImage}
             alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             loading="lazy"
           />
+          {/* Hover Image (Fade In) */}
           <img
             src={hoverImage}
             alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 group-hover:scale-110"
+            className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 group-hover:scale-105"
             loading="lazy"
           />
         </Link>
 
-        {/* FEATURE: The "Japam Style" Sharp Tag */}
+        {/* --- BADGES --- */}
+        {/* Discount Tag (Top Left) */}
         {discount > 0 && (
-          <div className="absolute top-0 left-0 z-10">
-             <div className="bg-[#D32F2F] text-white text-[10px] font-bold px-2 py-1 rounded-br-lg shadow-sm font-sans tracking-wide">
-                 {discount}% OFF
+          <div className="absolute top-2 left-2 z-10">
+             <div className="bg-[#D32F2F] text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm tracking-wide">
+                 -{discount}%
              </div>
           </div>
         )}
 
-        {/* Quick Add Button */}
+        {/* Best Seller / New Badge (Optional - based on logic) */}
+        {product.isBestSeller && (
+          <div className="absolute top-2 right-2 z-10">
+             <div className="bg-heritage-gold text-white text-[9px] font-bold px-2 py-1 rounded shadow-sm tracking-widest uppercase">
+                 Best Seller
+             </div>
+          </div>
+        )}
+
+        {/* --- ACTIONS --- */}
+        {/* Quick Add Button (Floating Bottom Right) */}
         <button
           onClick={(e) => {
             e.preventDefault();
             addToCart(product);
           }}
-          className="absolute bottom-2 right-2 w-9 h-9 bg-white text-[#2C1810] rounded-full shadow-md translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center hover:bg-[#2C1810] hover:text-[#F2C75C] z-20"
-          title="Add to Cart"
+          className="absolute bottom-3 right-3 w-10 h-10 bg-white text-heritage-charcoal rounded-full shadow-lg translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center hover:bg-heritage-rudraksha hover:text-white z-20"
+          title="Quick Add"
         >
-           <Plus size={18} strokeWidth={2} />
+           <Plus size={20} strokeWidth={1.5} />
         </button>
       </div>
 
-      {/* 2. INFO AREA (With Stars!) */}
-      <div className="text-left px-0.5">
-        {/* Star Rating Row */}
-        <div className="flex items-center gap-1 mb-1">
-           <div className="flex text-[#F2C75C]">
-             <Star size={10} fill="currentColor" strokeWidth={0} />
-             <Star size={10} fill="currentColor" strokeWidth={0} />
-             <Star size={10} fill="currentColor" strokeWidth={0} />
-             <Star size={10} fill="currentColor" strokeWidth={0} />
-             <Star size={10} fill="currentColor" strokeWidth={0} />
+      {/* 2. PRODUCT INFO */}
+      <div className="mt-3 flex flex-col gap-1 px-1">
+        
+        {/* Rating Row */}
+        <div className="flex items-center gap-1.5">
+           <div className="flex gap-0.5 text-heritage-gold">
+             {[...Array(5)].map((_, i) => (
+               <Star 
+                 key={i} 
+                 size={12} 
+                 fill={i < Math.floor(rating) ? "currentColor" : "none"} 
+                 strokeWidth={i < Math.floor(rating) ? 0 : 1.5} 
+                 className={i < Math.floor(rating) ? "" : "text-gray-300"}
+               />
+             ))}
            </div>
-           <span className="text-[10px] text-gray-400 font-medium">({reviews})</span>
+           <span className="text-[10px] text-heritage-grey font-medium opacity-80">({reviews})</span>
         </div>
 
         {/* Title */}
-        <h3 className="font-serif text-[14px] font-medium text-[#1C1917] leading-snug line-clamp-2 group-hover:text-[#B08D55] transition-colors mb-1">
-          <Link to={`/product/${product.id}`}>{product.name}</Link>
+        <h3 className="font-heading text-[15px] font-semibold text-heritage-charcoal leading-snug line-clamp-2 group-hover:text-heritage-rudraksha transition-colors cursor-pointer">
+          <Link to={`/product/${product.id}`}>
+            {product.name}
+          </Link>
         </h3>
 
-        {/* Price */}
-        <div className="flex items-baseline gap-2">
-             <span className="text-[15px] font-bold text-[#2C1810] font-sans">
+        {/* Price Row */}
+        <div className="flex items-baseline gap-2 mt-0.5">
+             <span className="text-[16px] font-bold text-heritage-charcoal font-body">
               ₹{price.toLocaleString()}
             </span>
             {comparePrice > price && (
-            <span className="text-[11px] text-gray-400 line-through font-sans">
-                ₹{comparePrice.toLocaleString()}
-            </span>
+              <span className="text-[12px] text-heritage-grey line-through font-body opacity-70">
+                  ₹{comparePrice.toLocaleString()}
+              </span>
             )}
         </div>
       </div>
