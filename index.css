@@ -1,77 +1,66 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  /* Fonts */
-  --font-cinzel: "Montserrat", sans-serif;   
-  --font-manrope: "Inter", sans-serif;       
+  /* --- TYPOGRAPHY: The Voice of the Guru [cite: 337] --- */
+  --font-heading: "Playfair Display", serif;   /* Authority/Tradition */
+  --font-body: "Roboto", sans-serif;           /* Readability/Modernity */
 
-  /* --- THE ASTRO-VEDIC MINIMALIST PALETTE --- */
+  /* --- THE SACRED TRIAD PALETTE [cite: 330] --- */
   
-  /* 1. PRIMARY: Kashi Saffron (The Brand Color) */
-  /* Vibrant Terracotta/Orange - Like Astrotalk's primary action color */
-  --color-heritage-terracotta: #D96C32; 
-  --color-heritage-rudraksha: #D96C32; /* Mapping old var to new Saffron */
-  --color-heritage-primary: #D96C32;
+  /* 1. SAFFRON GOLD (Prosperity/Divinity) [cite: 333] */
+  --color-heritage-saffron: #FFDE59;
+  --color-heritage-gold: #FFDE59;
 
-  /* 2. ACCENT: Vedic Gold (The Trust Color) */
-  /* Used for stars, icons, and subtle highlights */
-  --color-heritage-gold: #F59E0B;
-  --color-heritage-saffron: #F59E0B;
+  /* 2. VEDIC CRIMSON (Energy/Action) [cite: 333] */
+  --color-heritage-crimson: #BC002D;
+  --color-heritage-rudraksha: #BC002D; /* Primary Action Color */
 
-  /* 3. TEXT: Shiva Black (The Clarity Color) */
-  /* Sharp, high-contrast black for readability */
-  --color-heritage-charcoal: #111827;
-  --color-heritage-black: #000000;
+  /* 3. KARUNGALI EBONY (Protection/Luxury) [cite: 333] */
+  --color-heritage-ebony: #2C2C2C;
+  --color-heritage-charcoal: #2C2C2C;
+
+  /* 4. OLIVE PROSPERITY (Growth/Chat) [cite: 333] */
+  --color-heritage-olive: #8C8000;
+
+  /* 5. CANVAS: Warm Parchment (Eye Safety) [cite: 336] */
+  --color-heritage-parchment: #F9F7F2; 
+  --color-heritage-paper: #F9F7F2;
+  --color-heritage-sand: #F0F0F0; /* Soft Slate for cards */
   
-  /* 4. CANVAS: Pure Sukoon (The Peace) */
-  --color-heritage-paper: #FFFFFF; /* Pure White */
-  --color-heritage-sand: #FAFAFA;  /* Very subtle grey for differentiation */
-  --color-heritage-mist: #F3F4F6;  /* Light border */
-  
-  --color-heritage-grey: #6B7280;  /* Muted text */
+  --color-heritage-grey: #6B7280;
+  --color-heritage-alert: #D32F2F;
 
   /* Animations */
   --animate-fade-up: fadeUp 0.4s ease-out forwards;
-  --animate-fade-in: fadeIn 0.3s ease-out forwards;
   
   @keyframes fadeUp { 
     from { opacity: 0; transform: translateY(15px); } 
     to { opacity: 1; transform: translateY(0); } 
-  }
-  @keyframes fadeIn { 
-    from { opacity: 0; } 
-    to { opacity: 1; } 
   }
 }
 
 @layer base {
   html { overflow-x: hidden; width: 100%; }
   body {
-    background-color: var(--color-heritage-paper);
-    color: var(--color-heritage-charcoal);
-    font-family: var(--font-manrope);
+    background-color: var(--color-heritage-parchment);
+    color: var(--color-heritage-ebony);
+    font-family: var(--font-body);
+    line-height: 1.6; /* Increased line height for "High Context" readability [cite: 357] */
     -webkit-font-smoothing: antialiased;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-cinzel);
+    font-family: var(--font-heading);
     font-weight: 700;
-    color: var(--color-heritage-charcoal);
-    letter-spacing: -0.02em; 
+    color: var(--color-heritage-ebony);
   }
 
-  /* Minimalist Buttons */
+  /* Primary Button (Vedic Crimson) [cite: 333] */
   button.primary {
-    background-color: var(--color-heritage-terracotta);
+    background-color: var(--color-heritage-crimson);
     color: white;
-    font-weight: 600;
+    font-weight: 700;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 14px 0 rgba(217, 108, 50, 0.39); /* Saffron Glow */
-  }
-  button.primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px 0 rgba(217, 108, 50, 0.5);
   }
 }
 
