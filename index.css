@@ -1,217 +1,80 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  /* FONTS */
-  --font-playfair: "Playfair Display", serif;
-  --font-poppins: "Poppins", sans-serif;
+  /* Fonts */
+  --font-cinzel: "Montserrat", sans-serif;   
+  --font-manrope: "Inter", sans-serif;       
 
-  /* LUXURY COLOR PALETTE */
-  --color-primary-gold: #D4A574;
-  --color-primary-saffron: #F4A460;
-  --color-primary-terracotta: #C85C2E;
+  /* --- THE ASTRO-VEDIC MINIMALIST PALETTE --- */
   
-  --color-jewel-emerald: #1B4B3A;
-  --color-jewel-sapphire: #1E3A5F;
-  --color-jewel-amethyst: #5D3E6B;
-  --color-jewel-ruby: #A81E1E;
+  /* 1. PRIMARY: Kashi Saffron (The Brand Color) */
+  /* Vibrant Terracotta/Orange - Like Astrotalk's primary action color */
+  --color-heritage-terracotta: #D96C32; 
+  --color-heritage-rudraksha: #D96C32; /* Mapping old var to new Saffron */
+  --color-heritage-primary: #D96C32;
+
+  /* 2. ACCENT: Vedic Gold (The Trust Color) */
+  /* Used for stars, icons, and subtle highlights */
+  --color-heritage-gold: #F59E0B;
+  --color-heritage-saffron: #F59E0B;
+
+  /* 3. TEXT: Shiva Black (The Clarity Color) */
+  /* Sharp, high-contrast black for readability */
+  --color-heritage-charcoal: #111827;
+  --color-heritage-black: #000000;
   
-  --color-accent-sage: #7A8E75;
-  --color-accent-cream: #F5EFE7;
+  /* 4. CANVAS: Pure Sukoon (The Peace) */
+  --color-heritage-paper: #FFFFFF; /* Pure White */
+  --color-heritage-sand: #FAFAFA;  /* Very subtle grey for differentiation */
+  --color-heritage-mist: #F3F4F6;  /* Light border */
   
-  --color-neutral-black: #1A1A1A;
-  --color-neutral-charcoal: #2D2D2D;
-  --color-neutral-grey: #5A5A5A;
-  --color-neutral-light: #E8E8E8;
-  --color-neutral-white: #FFFFFF;
+  --color-heritage-grey: #6B7280;  /* Muted text */
+
+  /* Animations */
+  --animate-fade-up: fadeUp 0.4s ease-out forwards;
+  --animate-fade-in: fadeIn 0.3s ease-out forwards;
   
-  --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F9F7F4;
-  --color-bg-tertiary: #F0EDE8;
-  
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #5A5A5A;
-  --color-text-tertiary: #8A8A8A;
-  
-  --color-success: #2E7D32;
-  --color-warning: #F57C00;
-  --color-danger: #C62828;
+  @keyframes fadeUp { 
+    from { opacity: 0; transform: translateY(15px); } 
+    to { opacity: 1; transform: translateY(0); } 
+  }
+  @keyframes fadeIn { 
+    from { opacity: 0; } 
+    to { opacity: 1; } 
+  }
 }
 
 @layer base {
-  html { 
-    overflow-x: hidden; 
-    width: 100%;
-    scroll-behavior: smooth;
-  }
-  
+  html { overflow-x: hidden; width: 100%; }
   body {
-    background-color: var(--color-bg-primary);
-    color: var(--color-text-primary);
-    font-family: var(--font-poppins);
-    font-weight: 400;
-    line-height: 1.6;
+    background-color: var(--color-heritage-paper);
+    color: var(--color-heritage-charcoal);
+    font-family: var(--font-manrope);
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-playfair);
+    font-family: var(--font-cinzel);
     font-weight: 700;
-    color: var(--color-text-primary);
-    letter-spacing: -0.01em;
-    line-height: 1.2;
-  }
-  
-  h1 { font-size: 3.5rem; font-weight: 800; letter-spacing: -0.02em; }
-  h2 { font-size: 2.5rem; font-weight: 700; }
-  h3 { font-size: 1.75rem; font-weight: 700; }
-  h4 { font-size: 1.375rem; font-weight: 600; }
-  h5 { font-size: 1.125rem; font-weight: 600; }
-  h6 { font-size: 1rem; font-weight: 600; }
-  
-  p {
-    font-family: var(--font-poppins);
-    color: var(--color-text-secondary);
-  }
-  
-  a {
-    color: var(--color-primary-saffron);
-    text-decoration: none;
-  }
-  
-  a:hover {
-    color: var(--color-primary-terracotta);
+    color: var(--color-heritage-charcoal);
+    letter-spacing: -0.02em; 
   }
 
-  button {
-    font-family: var(--font-poppins);
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-  }
-  
+  /* Minimalist Buttons */
   button.primary {
-    background: linear-gradient(135deg, var(--color-primary-saffron) 0%, var(--color-primary-terracotta) 100%);
+    background-color: var(--color-heritage-terracotta);
     color: white;
-    box-shadow: 0 4px 12px rgba(244, 164, 96, 0.3);
-    border: none;
-  }
-  
-  button.primary:hover {
-    box-shadow: 0 6px 16px rgba(244, 164, 96, 0.4);
-  }
-  
-  button.secondary {
-    background-color: var(--color-neutral-white);
-    color: var(--color-text-primary);
-    border: 2px solid var(--color-neutral-light);
     font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(217, 108, 50, 0.39); /* Saffron Glow */
   }
-  
-  button.secondary:hover {
-    border-color: var(--color-primary-saffron);
-    color: var(--color-primary-saffron);
-  }
-
-  .card {
-    background-color: var(--color-bg-primary);
-    border: 1px solid rgba(212, 165, 116, 0.1);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
-  
-  .card:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-    border-color: rgba(212, 165, 116, 0.3);
-  }
-  
-  .card-premium {
-    background: linear-gradient(135deg, rgba(245, 241, 236, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
-    border: 2px solid var(--color-primary-gold);
-    border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(212, 165, 116, 0.15);
-  }
-
-  input, textarea, select {
-    font-family: var(--font-poppins);
-    border: 2px solid var(--color-neutral-light);
-    border-radius: 8px;
-    padding: 0.875rem 1.125rem;
-    color: var(--color-text-primary);
-  }
-  
-  input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: var(--color-primary-saffron);
-    box-shadow: 0 0 0 3px rgba(244, 164, 96, 0.1);
-  }
-
-  .badge {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 0.375rem 0.875rem;
-    border-radius: 20px;
-    text-transform: uppercase;
-  }
-  
-  .badge-primary {
-    background: linear-gradient(135deg, var(--color-primary-saffron) 0%, var(--color-primary-terracotta) 100%);
-    color: white;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-}
-
-@layer components {
-  .container-luxury {
-    @apply max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12;
-  }
-  
-  .section-luxury {
-    @apply py-16 md:py-24;
-  }
-
-  /* Fixed: Kept for standalone usage */
-  .btn-luxury {
-    @apply px-8 py-3.5 rounded-lg font-semibold text-sm uppercase tracking-wider;
-  }
-  
-  .btn-luxury-primary {
-    /* Fixed: Unpacked styles instead of applying 'btn-luxury' */
-    @apply px-8 py-3.5 rounded-lg font-semibold text-sm uppercase tracking-wider;
-    @apply bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md hover:shadow-lg;
-  }
-  
-  .btn-luxury-secondary {
-    /* Fixed: Unpacked styles instead of applying 'btn-luxury' */
-    @apply px-8 py-3.5 rounded-lg font-semibold text-sm uppercase tracking-wider;
-    @apply border-2 border-current text-gray-900 hover:bg-gray-50;
-  }
-
-  .card-luxury {
-    @apply bg-white border border-amber-100 rounded-2xl p-6 md:p-8 shadow-md hover:shadow-lg;
-  }
-
-  .header-luxury {
-    @apply font-playfair text-4xl md:text-5xl font-bold text-gray-900 leading-tight;
-  }
-  
-  .subheader-luxury {
-    @apply font-poppins text-base md:text-lg text-gray-600 font-light mt-3;
-  }
-
-  /* Fixed: Kept for standalone usage */
-  .badge-luxury {
-    @apply inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider;
-  }
-  
-  .badge-luxury-gold {
-    /* Fixed: Unpacked styles instead of applying 'badge-luxury' */
-    @apply inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider;
-    @apply bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800;
+  button.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px 0 rgba(217, 108, 50, 0.5);
   }
 }
+
+/* Utilities */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
