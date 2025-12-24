@@ -34,8 +34,11 @@ import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
 
 function App() {
   return (
-    // UPDATED: Using 'font-body' for the global font application
-    <div className="flex flex-col min-h-screen bg-heritage-paper text-heritage-grey font-body">
+    // GLOBAL STYLES: 
+    // bg-[#F9F7F2] = Warm Parchment (Eye Safety/Paper feel)
+    // font-body = Roboto
+    // text-[#2C2C2C] = Ebony (High Contrast)
+    <div className="flex flex-col min-h-screen bg-[#F9F7F2] text-[#2C2C2C] font-body selection:bg-[#FFDE59] selection:text-black">
       <ScrollToTop />
       
       {/* Global Modals */}

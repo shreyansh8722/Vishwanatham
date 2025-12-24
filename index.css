@@ -1,67 +1,84 @@
 @import "tailwindcss";
 
 @theme {
-  /* --- TYPOGRAPHY: The Voice of the Guru [cite: 337] --- */
-  --font-heading: "Playfair Display", serif;   /* Authority/Tradition */
-  --font-body: "Roboto", sans-serif;           /* Readability/Modernity */
+  /* --- TYPOGRAPHY --- */
+  --font-heading: "Crimson Pro", serif; 
+  --font-body: "Roboto", sans-serif;
 
-  /* --- THE SACRED TRIAD PALETTE [cite: 330] --- */
+  /* --- SACRED PALETTE --- */
   
-  /* 1. SAFFRON GOLD (Prosperity/Divinity) [cite: 333] */
+  /* 1. VEDIC CRIMSON (Primary Action) */
+  --color-heritage-rudraksha: #BC002D; 
+  --color-heritage-crimson: #9F1239;   
+
+  /* 2. SAFFRON GOLD (Trust) */
   --color-heritage-saffron: #FFDE59;
-  --color-heritage-gold: #FFDE59;
+  --color-heritage-gold: #F59E0B;
 
-  /* 2. VEDIC CRIMSON (Energy/Action) [cite: 333] */
-  --color-heritage-crimson: #BC002D;
-  --color-heritage-rudraksha: #BC002D; /* Primary Action Color */
+  /* 3. RUDRAKSHA BROWN (Secondary Action - NEW) */
+  /* A deep, sacred wood tone. Replaces the "odd" Olive. */
+  --color-heritage-brown: #5D4037; 
+  --color-heritage-coffee: #3E2723;
 
-  /* 3. KARUNGALI EBONY (Protection/Luxury) [cite: 333] */
-  --color-heritage-ebony: #2C2C2C;
+  /* 4. WARM CHARCOAL (Text) */
   --color-heritage-charcoal: #2C2C2C;
+  --color-heritage-ebony: #1A1A1A;
 
-  /* 4. OLIVE PROSPERITY (Growth/Chat) [cite: 333] */
+  /* 5. OLIVE (Keep for 'Consult' only, NOT for COD) */
   --color-heritage-olive: #8C8000;
 
-  /* 5. CANVAS: Warm Parchment (Eye Safety) [cite: 336] */
+  /* 6. BACKGROUNDS */
   --color-heritage-parchment: #F9F7F2; 
-  --color-heritage-paper: #F9F7F2;
-  --color-heritage-sand: #F0F0F0; /* Soft Slate for cards */
+  --color-heritage-mist: #E5E5E5;
   
-  --color-heritage-grey: #6B7280;
-  --color-heritage-alert: #D32F2F;
+  /* 7. ALERTS */
+  --color-alert-red: #DC2626;   
+  --color-alert-yellow: #B45309; 
+  --color-alert-green: #15803D;
 
-  /* Animations */
-  --animate-fade-up: fadeUp 0.4s ease-out forwards;
-  
-  @keyframes fadeUp { 
-    from { opacity: 0; transform: translateY(15px); } 
-    to { opacity: 1; transform: translateY(0); } 
+  /* --- ANIMATIONS --- */
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-pulse-glow: pulseGlow 2s infinite;
+  --animate-marquee: marquee 20s linear infinite;
+  --animate-fade-in: fadeIn 0.5s ease-out;
+
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(188, 0, 45, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(188, 0, 45, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(188, 0, 45, 0); }
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }
 
 @layer base {
-  html { overflow-x: hidden; width: 100%; }
+  html { overflow-x: hidden; width: 100%; scroll-behavior: smooth; }
   body {
     background-color: var(--color-heritage-parchment);
     color: var(--color-heritage-ebony);
     font-family: var(--font-body);
-    line-height: 1.6; /* Increased line height for "High Context" readability [cite: 357] */
+    line-height: 1.6; 
     -webkit-font-smoothing: antialiased;
   }
-  
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     font-weight: 700;
-    color: var(--color-heritage-ebony);
+    letter-spacing: -0.01em;
   }
-
-  /* Primary Button (Vedic Crimson) [cite: 333] */
-  button.primary {
-    background-color: var(--color-heritage-crimson);
-    color: white;
-    font-weight: 700;
-    transition: all 0.3s ease;
-  }
+  input, textarea, select { font-family: var(--font-body); outline: none; }
 }
 
 /* Utilities */
