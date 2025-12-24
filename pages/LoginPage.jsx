@@ -1,106 +1,127 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
-import { useAuth } from '../hooks/useAuth';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Loader2, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Lock, Phone, ArrowRight, ShieldCheck } from 'lucide-react';
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
-
-export default function LoginPage() {
-  const [mode, setMode] = useState('login');
-  const [error, setError] = useState(null);
-  const [authLoading, setAuthLoading] = useState(false);
-  
+const LoginPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user } = useAuth();
-  const { register, handleSubmit, reset } = useForm({ resolver: zodResolver(loginSchema) });
+  const [method, setMethod] = useState('otp'); // 'otp' or 'password'
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) navigate(location.state?.from || '/profile', { replace: true });
-  }, [user, navigate, location]);
-
-  const ensureUserProfile = async (firebaseUser) => {
-    if (!firebaseUser) return;
-    const userRef = doc(db, 'users', firebaseUser.uid);
-    const docSnap = await getDoc(userRef);
-    if (!docSnap.exists()) {
-      await setDoc(userRef, {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        name: firebaseUser.displayName || 'Devotee',
-        role: 'user',
-        createdAt: serverTimestamp()
-      });
-    }
-  };
-
-  const onSubmit = async (data) => {
-    setAuthLoading(true); setError(null);
-    try {
-      const result = mode === 'login' 
-        ? await signInWithEmailAndPassword(auth, data.email, data.password)
-        : await createUserWithEmailAndPassword(auth, data.email, data.password);
-      await ensureUserProfile(result.user);
-    } catch (err) {
-      setError("Authentication failed. Please check your credentials.");
-    } finally { setAuthLoading(false); }
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      navigate('/profile');
+    }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-heritage-paper flex pt-20 font-body">
-      {/* Visual Side */}
-      <div className="hidden lg:flex w-1/2 bg-heritage-rudraksha relative items-center justify-center overflow-hidden">
-        <div className="relative z-10 text-center text-white p-12 max-w-lg">
-          <h2 className="font-heading text-5xl mb-6">Join the Sankalp</h2>
-          <p className="text-white/80 text-lg font-light leading-relaxed">
-            "Unlock exclusive access to live darshans and track your spiritual journey."
-          </p>
-        </div>
+    <div className="min-h-screen bg-heritage-parchment flex items-center justify-center p-4 relative overflow-hidden">
+      
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none" 
+           style={{ backgroundImage: 'radial-gradient(#BC002D 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
       </div>
 
-      {/* Form Side */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-24 bg-white">
-        <div className="w-full max-w-sm space-y-8">
-          <div className="text-center">
-            <h1 className="font-heading text-4xl text-heritage-charcoal mb-2">
-              {mode === 'login' ? 'Welcome back' : 'Begin Journey'}
-            </h1>
-            <p className="text-sm text-heritage-grey">
-              {mode === 'login' ? 'Sign in to access your account' : 'Create an account to get started'}
-            </p>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-heritage-mist overflow-hidden relative z-10">
+        
+        {/* Header */}
+        <div className="bg-heritage-charcoal p-6 text-center">
+          <h2 className="font-heading text-2xl text-heritage-saffron font-bold">Welcome Back</h2>
+          <p className="text-gray-400 text-xs mt-1">Log in to access your saved Sankalp & Orders</p>
+        </div>
+
+        {/* Form Body */}
+        <div className="p-8">
+          
+          {/* Toggle Method */}
+          <div className="flex bg-heritage-parchment rounded-lg p-1 mb-8">
+            <button 
+              onClick={() => setMethod('otp')}
+              className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${method === 'otp' ? 'bg-white shadow text-heritage-rudraksha' : 'text-heritage-grey hover:text-heritage-charcoal'}`}
+            >
+              Login with OTP
+            </button>
+            <button 
+              onClick={() => setMethod('password')}
+              className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${method === 'password' ? 'bg-white shadow text-heritage-rudraksha' : 'text-heritage-grey hover:text-heritage-charcoal'}`}
+            >
+              Password
+            </button>
           </div>
 
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 text-sm flex items-center gap-2 rounded-sm border border-red-100">
-              <AlertCircle size={16} /> {error}
-            </div>
-          )}
+          <form onSubmit={handleLogin} className="space-y-6">
+            
+            {method === 'otp' ? (
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-heritage-charcoal uppercase tracking-wider">Mobile Number</label>
+                <div className="relative">
+                  <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-heritage-grey" />
+                  <input 
+                    type="tel" 
+                    placeholder="+91 98765 43210" 
+                    className="w-full pl-10 pr-4 py-3 border border-heritage-mist rounded-lg focus:border-heritage-rudraksha outline-none transition-colors"
+                    required
+                  />
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-heritage-charcoal uppercase tracking-wider">Email Address</label>
+                  <input 
+                    type="email" 
+                    placeholder="devotee@example.com" 
+                    className="w-full px-4 py-3 border border-heritage-mist rounded-lg focus:border-heritage-rudraksha outline-none transition-colors"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-heritage-charcoal uppercase tracking-wider">Password</label>
+                  <input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    className="w-full px-4 py-3 border border-heritage-mist rounded-lg focus:border-heritage-rudraksha outline-none transition-colors"
+                    required
+                  />
+                </div>
+              </>
+            )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <input {...register("email")} className="w-full border-b border-heritage-mist py-3 text-sm focus:border-heritage-rudraksha outline-none bg-transparent placeholder-heritage-grey/50" placeholder="Email Address" />
-            <input type="password" {...register("password")} className="w-full border-b border-heritage-mist py-3 text-sm focus:border-heritage-rudraksha outline-none bg-transparent placeholder-heritage-grey/50" placeholder="Password" />
-
-            <button type="submit" disabled={authLoading} className="w-full bg-heritage-charcoal text-white py-4 text-xs font-bold uppercase tracking-[0.2em] hover:bg-heritage-rudraksha transition-all shadow-lg mt-4">
-              {authLoading ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : (mode === 'login' ? 'Sign In' : 'Create Account')}
+            <button 
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-gradient-to-r from-heritage-rudraksha to-heritage-crimson text-white font-bold rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <span className="animate-pulse">Verifying...</span>
+              ) : (
+                <>
+                  {method === 'otp' ? 'Get OTP' : 'Secure Login'} <ArrowRight size={18} />
+                </>
+              )}
             </button>
+
           </form>
 
-          <div className="text-center pt-4">
-             <button onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); reset(); setError(null); }} className="text-heritage-rudraksha text-xs font-bold uppercase tracking-widest border-b border-heritage-rudraksha pb-0.5">
-               {mode === 'login' ? "Create an account" : "Sign in instead"}
-             </button>
+          {/* Footer Links */}
+          <div className="mt-6 text-center space-y-4">
+            <p className="text-xs text-heritage-grey">
+              New to Vishwanatham? <Link to="/signup" className="text-heritage-rudraksha font-bold hover:underline">Create Account</Link>
+            </p>
+            
+            <div className="flex items-center justify-center gap-2 text-[10px] text-green-700 bg-green-50 py-2 rounded border border-green-100">
+              <ShieldCheck size={12} />
+              <span>Your personal details are 100% encrypted & secure.</span>
+            </div>
           </div>
+
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default LoginPage;

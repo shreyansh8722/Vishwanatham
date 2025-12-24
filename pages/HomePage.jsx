@@ -1,108 +1,101 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Scroll, Loader2 } from 'lucide-react';
-import SEO from '../components/SEO';
 import Hero from '../components/home/Hero';
-import { CategoryRow } from '../components/home/CategoryRow'; 
-import ProductCard from '../components/shop/ProductCard';
-import { useProducts } from '../context/ProductContext';
-import IntentionGrid from '../components/home/IntentionGrid';
-import TestimonialSlider from '../components/home/TestimonialSlider';
+import FeaturedCategories from '../components/home/FeaturedCategories';
+import BestSellers from '../components/home/BestSellers';
+import Testimonials from '../components/home/Testimonials';
+import RitualShowcase from '../components/home/RitualShowcase'; 
+import SadhanaChallenge from '../components/home/SadhanaChallenge'; 
+import { Sparkles, Moon, Sun } from 'lucide-react';
 
-const HomePage = () => {
-  const { products, loading } = useProducts();
-  
-  // Get first 4 products for New Arrivals
-  const newArrivals = products.slice(0, 4);
-
+const Home = () => {
   return (
-    <div className="bg-heritage-paper min-h-screen font-manrope text-heritage-charcoal">
-      <SEO 
-        title="Vishwanatham | Authentic Spiritual Heritage of Kashi" 
-        description="Buy original Rudraksha, Gemstones, and Yantras energized in Kashi."
-      />
-
-      {/* 1. HERO */}
+    <div className="bg-heritage-parchment min-h-screen font-body">
+      
+      {/* 1. HERO SECTION */}
       <Hero />
 
-      {/* 2. CATEGORIES */}
-      <CategoryRow />
-
-      {/* 3. NEW ARRIVALS */}
-      <section className="py-20 container mx-auto px-4 md:px-8 bg-heritage-paper">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4 animate-fade-up">
-          <div>
-            <span className="text-heritage-rudraksha text-xs font-bold uppercase tracking-[0.2em] mb-2 block">
-              Fresh from Varanasi
-            </span>
-            <h2 className="font-cinzel text-3xl md:text-4xl font-bold text-heritage-charcoal">
-              New Arrivals
-            </h2>
-          </div>
-          
-          <Link 
-            to="/shop" 
-            className="group flex items-center gap-2 text-sm font-bold text-heritage-rudraksha hover:text-heritage-gold transition-colors pb-1 border-b border-transparent hover:border-heritage-gold"
-          >
-            View All Artifacts 
-            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-
-        {loading ? (
-           <div className="flex justify-center py-20">
-             <Loader2 className="animate-spin text-heritage-rudraksha" size={40} />
-           </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10">
-            {newArrivals.length > 0 ? (
-              newArrivals.map((product) => (
-                <div key={product.id} className="animate-fade-up">
-                  <ProductCard product={product} />
-                </div>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-20 bg-heritage-sand rounded-xl border border-dashed border-heritage-mist">
-                <p className="text-heritage-grey font-cinzel">New spiritual treasures are arriving soon...</p>
+      {/* 2. DAILY PANCHANG / HOROSCOPE */}
+      <section className="py-10 border-b border-heritage-mist bg-white">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
+           <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-heritage-parchment rounded-full flex items-center justify-center border border-heritage-olive/30">
+                 <Sun size={24} className="text-heritage-olive" />
               </div>
-            )}
-          </div>
-        )}
-      </section>
+              <div>
+                 <h3 className="font-heading font-bold text-heritage-charcoal text-lg">Daily Panchang</h3>
+                 <p className="text-xs text-heritage-grey">Sunrise: 06:12 AM • Rahu Kaal: 10:30 AM</p>
+              </div>
+           </div>
+           
+           <div className="h-8 w-[1px] bg-heritage-mist hidden md:block"></div>
 
-      {/* 4. INTENTION GRID (Moved Here) */}
-      <IntentionGrid />
+           <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-heritage-parchment rounded-full flex items-center justify-center border border-heritage-rudraksha/20">
+                 <Moon size={24} className="text-heritage-rudraksha" />
+              </div>
+              <div>
+                 <h3 className="font-heading font-bold text-heritage-charcoal text-lg">Today's Horoscope</h3>
+                 <p className="text-xs text-heritage-grey">Moon in Vrishabha • Good for travel</p>
+              </div>
+           </div>
 
-      {/* 5. TESTIMONIALS */}
-      <TestimonialSlider />
-
-      {/* 6. NEWSLETTER */}
-      <section className="py-20 bg-heritage-paper border-t border-heritage-mist">
-        <div className="container mx-auto px-4 max-w-3xl text-center">
-          <span className="inline-block p-3 rounded-full bg-heritage-sand text-heritage-rudraksha mb-6 shadow-sm border border-heritage-mist">
-            <Scroll size={24} />
-          </span>
-          <h2 className="font-cinzel text-3xl font-bold text-heritage-charcoal mb-4">
-            Join the Spiritual Journey
-          </h2>
-          <p className="text-heritage-grey mb-8 font-manrope">
-            Subscribe to receive insights on Vedic astrology, auspicious dates, and exclusive offers.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
-            <input 
-              type="email" 
-              placeholder="Enter your email address" 
-              className="flex-1 px-4 py-3 border border-heritage-mist rounded-lg focus:outline-none focus:border-heritage-rudraksha bg-white placeholder:text-gray-400"
-            />
-            <button className="px-6 py-3 bg-heritage-rudraksha text-white font-bold rounded-lg hover:bg-heritage-charcoal transition-colors shadow-lg uppercase text-xs tracking-wider">
-              Subscribe
-            </button>
-          </form>
+           <button className="text-xs font-bold uppercase tracking-widest text-heritage-rudraksha border-b border-heritage-rudraksha pb-1 hover:text-heritage-crimson transition-colors">
+             Read Full Forecast
+           </button>
         </div>
       </section>
-      
+
+      {/* 3. FEATURED CATEGORIES */}
+      <section className="py-16 container mx-auto px-4">
+        <div className="text-center mb-12">
+          <span className="text-heritage-rudraksha font-bold text-xs tracking-[0.2em] uppercase flex items-center justify-center gap-2">
+            <Sparkles size={14} /> Sacred Collections
+          </span>
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-heritage-charcoal mt-3">
+            Treasures of Kashi
+          </h2>
+          <p className="text-heritage-grey mt-4 max-w-2xl mx-auto">
+            Hand-selected spiritual tools to align your energy and bring prosperity.
+          </p>
+        </div>
+        <FeaturedCategories />
+      </section>
+
+      {/* 4. BEST SELLERS */}
+      <BestSellers />
+
+      {/* 5. RITUAL SHOWCASE (Pran Pratistha) - MOVED HERE */}
+      <RitualShowcase />
+
+      {/* 6. SADHANA CHALLENGE */}
+      <SadhanaChallenge />
+
+      {/* 7. WHY CHOOSE US (Detailed Trust) */}
+      <section className="py-20 bg-heritage-olive/5 border-y border-heritage-olive/10">
+         <div className="container mx-auto px-4 text-center">
+            <h2 className="font-heading text-3xl font-bold text-heritage-charcoal mb-12">The Vishwanatham Promise</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               <div className="p-6 bg-white rounded-xl shadow-sm border border-heritage-mist">
+                  <h4 className="font-heading font-bold text-xl mb-3 text-heritage-olive">Vedic Authenticity</h4>
+                  <p className="text-sm text-heritage-grey leading-relaxed">Every Rudraksha is X-ray tested and every Gemstone is lab certified. We sell only what is written in the Shastras.</p>
+               </div>
+               <div className="p-6 bg-white rounded-xl shadow-sm border border-heritage-mist">
+                  <h4 className="font-heading font-bold text-xl mb-3 text-heritage-olive">Energized in Kashi</h4>
+                  <p className="text-sm text-heritage-grey leading-relaxed">Located in the heart of Varanasi, our Pandits perform Pran Pratistha on every item before dispatch.</p>
+               </div>
+               <div className="p-6 bg-white rounded-xl shadow-sm border border-heritage-mist">
+                  <h4 className="font-heading font-bold text-xl mb-3 text-heritage-olive">Karma-Free Shipping</h4>
+                  <p className="text-sm text-heritage-grey leading-relaxed">Secure, tamper-proof packaging ensures your spiritual tools reach you with their energy intact.</p>
+               </div>
+            </div>
+         </div>
+      </section>
+
+      {/* 8. SOCIAL PROOF */}
+      <Testimonials />
+
     </div>
   );
 };
 
-export default HomePage;
+export default Home;
