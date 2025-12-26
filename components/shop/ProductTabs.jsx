@@ -11,23 +11,23 @@ const ProductTabs = ({ product }) => {
   ];
 
   return (
-    <div className="border-t border-stone-200">
+    <div className="border-t border-gray-200">
       {tabs.map((tab) => (
-        <div key={tab.id} className="border-b border-stone-200">
+        <div key={tab.id} className="border-b border-gray-200">
           <button
             onClick={() => setOpenTab(openTab === tab.id ? null : tab.id)}
             className="w-full py-5 flex items-center justify-between text-left group"
           >
-            <span className="text-sm font-medium text-stone-900 group-hover:text-stone-600 transition-colors uppercase tracking-wide">
+            <span className={`text-sm font-bold uppercase tracking-widest transition-colors ${openTab === tab.id ? 'text-black' : 'text-gray-500 group-hover:text-black'}`}>
               {tab.label}
             </span>
-            <span className="text-stone-400">
+            <span className="text-black">
               {openTab === tab.id ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             </span>
           </button>
           
           <div className={`overflow-hidden transition-all duration-300 ease-in-out ${openTab === tab.id ? 'max-h-96 opacity-100 pb-5' : 'max-h-0 opacity-0'}`}>
-            <div className="text-sm text-stone-600 leading-relaxed prose prose-stone">
+            <div className="text-sm text-gray-600 leading-relaxed font-body">
               {tab.content}
             </div>
           </div>

@@ -34,9 +34,9 @@ const Testimonials = () => {
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-black mb-4">
             Loved by Devotees
           </h2>
-          <div className="flex justify-center items-center gap-2 text-sm text-gray-600">
+          <div className="flex justify-center items-center gap-2 text-sm text-gray-600 mt-2">
             <span className="font-bold text-black text-lg">4.9</span>
-            <div className="flex text-primary">
+            <div className="flex text-[var(--color-primary)]">
               {[1,2,3,4,5].map(i => <Star key={i} size={16} fill="currentColor" strokeWidth={0} />)}
             </div>
             <span>from 15,000+ reviews</span>
@@ -45,8 +45,8 @@ const Testimonials = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {reviews.map((review) => (
-            <div key={review.id} className="bg-gray-50 p-8 rounded-sm hover:shadow-lg transition-shadow duration-300">
-              <div className="flex text-primary mb-4">
+            <div key={review.id} className="bg-gray-50 p-8 rounded-sm hover:shadow-lg transition-shadow duration-300 border border-transparent hover:border-gray-100">
+              <div className="flex text-[var(--color-primary)] mb-4">
                 {[...Array(review.rating)].map((_, i) => (
                   <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
                 ))}
@@ -61,7 +61,7 @@ const Testimonials = () => {
                     <h4 className="font-heading font-bold text-black text-sm">{review.name}</h4>
                     <p className="text-[10px] text-gray-500 uppercase tracking-wider">{review.location}</p>
                  </div>
-                 <div className="flex items-center gap-1 text-[10px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full uppercase tracking-wider">
+                 <div className="flex items-center gap-1 text-[10px] font-bold text-green-700 bg-green-50 px-2 py-1 rounded-full uppercase tracking-wider">
                     <CheckCircle2 size={10} /> Verified
                  </div>
               </div>

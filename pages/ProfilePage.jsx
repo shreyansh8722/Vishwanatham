@@ -1,179 +1,146 @@
-import React, { useState } from 'react';
-import { 
-  User, Package, MapPin, Scroll, LogOut, 
-  Edit2, ChevronRight, Flame, Settings 
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Package, MapPin, LogOut, User, LayoutDashboard, ChevronRight } from 'lucide-react'; // Added LayoutDashboard icon
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth'; 
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth(); 
   const [activeTab, setActiveTab] = useState('orders');
 
-  const menuItems = [
-    { id: 'orders', label: 'My Orders', icon: <Package size={18} /> },
-    { id: 'sankalp', label: 'My Sankalp Details', icon: <Flame size={18} /> },
-    { id: 'addresses', label: 'Saved Addresses', icon: <MapPin size={18} /> },
-    { id: 'profile', label: 'Profile Settings', icon: <Settings size={18} /> },
-  ];
+  // Protect Route
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
+  if (!user) return null;
+
+  const getInitials = (name) => name ? name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <div className="min-h-screen bg-heritage-parchment pb-20 pt-10 px-4 font-body">
-      <div className="container mx-auto max-w-5xl">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 font-body">
+      <div className="container mx-auto max-w-6xl">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10">
-          <div>
-            <h1 className="font-heading text-3xl font-bold text-heritage-charcoal">Namaste, Rahul</h1>
-            <p className="text-heritage-grey text-sm">Member since Nov 2024 • <span className="text-heritage-rudraksha font-bold">Kashi Devotee</span></p>
-          </div>
-          <button className="flex items-center gap-2 text-xs font-bold text-heritage-rudraksha border border-heritage-rudraksha px-4 py-2 rounded hover:bg-heritage-rudraksha hover:text-white transition-colors">
-            <LogOut size={14} /> Logout
-          </button>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 gap-4">
+           <div>
+             <h1 className="font-heading text-3xl md:text-4xl font-bold text-black">My Account</h1>
+             <p className="text-gray-500 mt-2 text-sm">
+               Welcome back, <span className="text-black font-bold">{user.displayName || 'Devotee'}</span>
+             </p>
+           </div>
+           
+           <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                Member Since {new Date(user.metadata.creationTime).getFullYear()}
+              </span>
+           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8">
-          
-          {/* Sidebar Navigation */}
-          <div className="w-full md:w-64 flex-shrink-0 space-y-2">
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between p-4 rounded-lg text-sm font-bold transition-all ${
-                  activeTab === item.id 
-                    ? 'bg-heritage-charcoal text-white shadow-md' 
-                    : 'bg-white text-heritage-charcoal hover:bg-gray-50 border border-heritage-mist'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  {item.icon}
-                  {item.label}
-                </div>
-                {activeTab === item.id && <ChevronRight size={16} />}
-              </button>
-            ))}
-          </div>
-
-          {/* Main Content Area */}
-          <div className="flex-1">
-            
-            {/* ORDERS TAB */}
-            {activeTab === 'orders' && (
-              <div className="space-y-4 animate-fade-in">
-                <h2 className="font-heading text-xl font-bold text-heritage-charcoal mb-4">Recent Orders</h2>
-                {[1, 2].map((order) => (
-                  <div key={order} className="bg-white p-6 rounded-xl border border-heritage-mist shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Delivered</span>
-                        <h3 className="font-bold text-heritage-charcoal mt-2">5 Mukhi Rudraksha + Pyrite Bracelet</h3>
-                        <p className="text-xs text-heritage-grey">Ordered on 12 Dec 2024</p>
-                      </div>
-                      <span className="font-heading font-bold text-lg text-heritage-rudraksha">₹1,499</span>
+        <div className="flex flex-col lg:flex-row gap-8">
+           
+           {/* SIDEBAR NAVIGATION */}
+           <div className="w-full lg:w-1/4">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden sticky top-24">
+                 
+                 {/* User Info */}
+                 <div className="p-6 border-b border-gray-100 bg-gray-50/50">
+                    <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-heading font-bold text-xl mb-3">
+                       {getInitials(user.displayName)}
                     </div>
-                    <div className="flex gap-3 pt-4 border-t border-heritage-mist">
-                      <button className="text-xs font-bold text-heritage-charcoal hover:text-heritage-rudraksha transition-colors">View Details</button>
-                      <button className="text-xs font-bold text-heritage-charcoal hover:text-heritage-rudraksha transition-colors">Download Invoice</button>
+                    <div className="text-sm font-bold text-black">{user.displayName || 'User'}</div>
+                    <div className="text-xs text-gray-500 truncate" title={user.email}>{user.email}</div>
+                 </div>
+
+                 {/* Menu Items */}
+                 <nav className="p-2 space-y-1">
+                   <button 
+                     onClick={() => setActiveTab('orders')}
+                     className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold uppercase tracking-wide transition-all ${
+                       activeTab === 'orders' ? 'bg-black text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-black'
+                     }`}
+                   >
+                      <Package size={18} /> Order History
+                   </button>
+                   
+                   <button 
+                     onClick={() => setActiveTab('addresses')}
+                     className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold uppercase tracking-wide transition-all ${
+                       activeTab === 'addresses' ? 'bg-black text-white shadow-md' : 'text-gray-500 hover:bg-gray-50 hover:text-black'
+                     }`}
+                   >
+                      <MapPin size={18} /> Addresses
+                   </button>
+
+                   <div className="my-2 border-t border-gray-100"></div>
+
+                   {/* --- ADMIN BUTTON (Only if role is admin) --- */}
+                   {user.role === 'admin' && (
+                     <button 
+                       onClick={() => navigate('/admin')}
+                       className="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold uppercase tracking-wide text-black hover:bg-gray-100 transition-colors mb-1"
+                     >
+                        <LayoutDashboard size={18} /> Admin Dashboard
+                     </button>
+                   )}
+
+                   <button 
+                     onClick={handleLogout}
+                     className="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-bold uppercase tracking-wide text-red-500 hover:bg-red-50 transition-colors"
+                   >
+                      <LogOut size={18} /> Logout
+                   </button>
+                 </nav>
+              </div>
+           </div>
+
+           {/* RIGHT CONTENT AREA */}
+           <div className="w-full lg:w-3/4">
+              
+              {/* Orders Tab */}
+              {activeTab === 'orders' && (
+                 <div className="space-y-6 animate-fade-in">
+                    <h2 className="font-heading text-2xl font-bold mb-6">Recent Orders</h2>
+                    <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+                        <Package size={48} className="mx-auto text-gray-300 mb-4" />
+                        <h3 className="text-lg font-bold text-gray-900">No orders yet</h3>
+                        <p className="text-gray-500 text-sm mb-6">Your spiritual journey begins with your first step.</p>
+                        <button onClick={() => navigate('/shop')} className="px-6 py-2 bg-black text-white text-xs font-bold uppercase rounded hover:bg-[var(--color-primary)] transition-colors">
+                           Start Shopping
+                        </button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                 </div>
+              )}
 
-            {/* SANKALP DETAILS TAB (Unique Feature) */}
-            {activeTab === 'sankalp' && (
-              <div className="bg-white p-8 rounded-xl border border-heritage-mist shadow-sm animate-fade-in">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-heritage-parchment rounded-full border border-heritage-saffron">
-                    <Scroll size={24} className="text-heritage-rudraksha" />
-                  </div>
-                  <div>
-                    <h2 className="font-heading text-xl font-bold text-heritage-charcoal">Sankalp Information</h2>
-                    <p className="text-xs text-heritage-grey">Used by our Pandits for your rituals</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-heritage-grey uppercase">Gotra</label>
-                    <input type="text" defaultValue="Kashyap" className="w-full p-3 border border-heritage-mist rounded bg-heritage-parchment/50 font-bold text-heritage-charcoal" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-heritage-grey uppercase">Rashi (Zodiac)</label>
-                    <select className="w-full p-3 border border-heritage-mist rounded bg-heritage-parchment/50 font-bold text-heritage-charcoal">
-                      <option>Mesha (Aries)</option>
-                      <option>Vrishabha (Taurus)</option>
-                      {/* Add others */}
-                    </select>
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <label className="text-xs font-bold text-heritage-grey uppercase">Nakshatra (Optional)</label>
-                    <input type="text" placeholder="e.g. Rohini" className="w-full p-3 border border-heritage-mist rounded bg-heritage-parchment/50 font-bold text-heritage-charcoal" />
-                  </div>
-                </div>
-                
-                <button className="mt-8 px-6 py-3 bg-heritage-charcoal text-white text-sm font-bold rounded hover:bg-black transition-colors shadow-lg">
-                  Save Sankalp Details
-                </button>
-              </div>
-            )}
-
-            {/* ADDRESS TAB */}
-            {activeTab === 'addresses' && (
-              <div className="space-y-4 animate-fade-in">
-                <h2 className="font-heading text-xl font-bold text-heritage-charcoal mb-4">Saved Addresses</h2>
-                <div className="bg-white p-6 rounded-xl border-2 border-heritage-rudraksha/20 shadow-sm relative">
-                  <span className="absolute top-4 right-4 bg-heritage-parchment text-heritage-rudraksha text-[10px] font-bold px-2 py-1 rounded border border-heritage-rudraksha">DEFAULT</span>
-                  <h3 className="font-bold text-heritage-charcoal mb-2">Home</h3>
-                  <p className="text-sm text-heritage-grey leading-relaxed">
-                    Rahul Sharma<br/>
-                    B-402, Lotus Apartments, Godowlia<br/>
-                    Varanasi, Uttar Pradesh - 221001<br/>
-                    +91 9876543210
-                  </p>
-                  <div className="flex gap-4 mt-4">
-                    <button className="flex items-center gap-1 text-xs font-bold text-heritage-charcoal hover:text-heritage-rudraksha">
-                      <Edit2 size={12} /> Edit
-                    </button>
-                    <button className="text-xs font-bold text-alert-red hover:text-red-700">Delete</button>
-                  </div>
-                </div>
-                
-                <button className="w-full py-4 border-2 border-dashed border-heritage-mist rounded-xl text-heritage-grey font-bold text-sm hover:border-heritage-charcoal hover:text-heritage-charcoal transition-all">
-                  + Add New Address
-                </button>
-              </div>
-            )}
-
-            {/* PROFILE SETTINGS TAB */}
-            {activeTab === 'profile' && (
-              <div className="bg-white p-8 rounded-xl border border-heritage-mist shadow-sm animate-fade-in">
-                <h2 className="font-heading text-xl font-bold text-heritage-charcoal mb-6">Personal Details</h2>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-heritage-grey uppercase">First Name</label>
-                      <input type="text" defaultValue="Rahul" className="w-full p-3 border border-heritage-mist rounded focus:border-heritage-rudraksha outline-none" />
+              {/* Addresses Tab */}
+              {activeTab === 'addresses' && (
+                 <div className="space-y-6 animate-fade-in">
+                    <div className="flex justify-between items-end mb-6">
+                       <h2 className="font-heading text-2xl font-bold">Saved Addresses</h2>
+                       <button className="text-xs font-bold text-[var(--color-primary)] uppercase hover:underline">
+                         + Add New
+                       </button>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-heritage-grey uppercase">Last Name</label>
-                      <input type="text" defaultValue="Sharma" className="w-full p-3 border border-heritage-mist rounded focus:border-heritage-rudraksha outline-none" />
+                    <div className="bg-white p-8 rounded-xl border border-dashed border-gray-300 text-center">
+                        <p className="text-gray-500 text-sm">You haven't saved any addresses yet.</p>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-heritage-grey uppercase">Email</label>
-                    <input type="email" defaultValue="rahul@example.com" className="w-full p-3 border border-heritage-mist rounded focus:border-heritage-rudraksha outline-none" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-heritage-grey uppercase">Phone</label>
-                    <input type="tel" defaultValue="+91 98765 43210" className="w-full p-3 border border-heritage-mist rounded focus:border-heritage-rudraksha outline-none" />
-                  </div>
-                  <button className="mt-4 px-6 py-3 bg-heritage-charcoal text-white text-sm font-bold rounded hover:bg-black transition-colors shadow-lg">
-                    Update Profile
-                  </button>
-                </div>
-              </div>
-            )}
+                 </div>
+              )}
 
-          </div>
+           </div>
+
         </div>
       </div>
     </div>

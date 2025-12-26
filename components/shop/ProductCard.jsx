@@ -8,12 +8,13 @@ export const ProductCard = ({ product }) => {
 
   if (!product) return null;
 
-  const mainImage = product.featuredImageUrl || 'https://via.placeholder.com/400';
+  // 1. Determine the image URL to display
+  const mainImage = product.featuredImageUrl || product.image || 'https://via.placeholder.com/400';
+  
   const price = Number(product.price) || 0;
   const comparePrice = Number(product.comparePrice) || 0;
   const savings = comparePrice > price ? comparePrice - price : 0;
   const rating = product.rating || 4.9;
-  const reviews = product.reviewCount || 120;
 
   return (
     <div className="group relative flex flex-col bg-white">
@@ -37,7 +38,7 @@ export const ProductCard = ({ product }) => {
             </span>
           )}
           {savings > 0 && (
-            <span className="bg-primary text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest">
+            <span className="bg-[var(--color-primary)] text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest">
               -{Math.round((savings/comparePrice)*100)}%
             </span>
           )}
@@ -45,7 +46,11 @@ export const ProductCard = ({ product }) => {
 
         {/* Hover Action Button */}
         <button 
-           onClick={(e) => { e.preventDefault(); addToCart(product); }}
+           onClick={(e) => { 
+             e.preventDefault(); 
+             // FIX: Explicitly pass 'image' property to Cart so it displays correctly
+             addToCart({ ...product, image: mainImage }); 
+           }}
            className="absolute bottom-4 left-4 right-4 bg-white text-black py-3 text-xs font-bold uppercase tracking-wider shadow-lg translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-2 hover:bg-black hover:text-white"
         >
            <ShoppingBag size={14} /> Add to Cart
@@ -54,7 +59,7 @@ export const ProductCard = ({ product }) => {
 
       {/* 2. PRODUCT INFO */}
       <div className="pt-4 pb-2">
-        <h3 className="font-heading text-[17px] font-medium text-black leading-snug mb-1 line-clamp-2 hover:text-primary transition-colors">
+        <h3 className="font-heading text-[17px] font-medium text-black leading-snug mb-1 line-clamp-2 hover:text-[var(--color-primary)] transition-colors">
           <Link to={`/product/${product.id}`}>
             {product.name}
           </Link>

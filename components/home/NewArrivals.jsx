@@ -6,8 +6,6 @@ import { Link } from 'react-router-dom';
 
 const NewArrivals = () => {
   const { products, loading } = useProducts();
-  // Getting the latest 4 or 8 products. 
-  // Assuming 'products' might be sorted by date in context, or just taking the first few.
   const latestProducts = products.slice(0, 4); 
 
   if (loading) {
@@ -19,22 +17,19 @@ const NewArrivals = () => {
   }
 
   return (
-    <section className="py-16 px-4 bg-white"> 
+    <section className="py-20 px-4 bg-white border-b border-gray-50"> 
       <div className="max-w-7xl mx-auto">
         
-        {/* Header - Clean & Minimal (Removed Eyebrow Text as requested) */}
-        <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-4">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row items-end justify-between mb-10 gap-4">
           <div>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-black">
               New Arrivals
             </h2>
-            <p className="text-gray-500 mt-2 text-sm">
-              Freshly energized artifacts from the Ghats.
-            </p>
           </div>
           
-          <Link to="/shop?sort=new" className="hidden md:flex items-center gap-2 text-sm font-bold text-[var(--color-primary)] hover:text-black transition-colors">
-             View All <ArrowRight size={16} />
+          <Link to="/shop?sort=new" className="hidden md:flex items-center gap-2 text-sm font-bold text-black hover:text-[var(--color-primary)] transition-colors uppercase tracking-wider">
+             View All Products <ArrowRight size={16} />
           </Link>
         </div>
 
@@ -45,8 +40,8 @@ const NewArrivals = () => {
               <ProductCard key={product.id} product={product} />
             ))
           ) : (
-            <div className="col-span-full text-center py-20 bg-gray-50 rounded-lg">
-              <p className="text-gray-400 italic">
+            <div className="col-span-full text-center py-20 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+              <p className="text-gray-400 font-medium">
                 Our artisans are crafting new blessings...
               </p>
             </div>
@@ -54,9 +49,9 @@ const NewArrivals = () => {
         </div>
 
         {/* Mobile View All Button */}
-        <div className="mt-8 md:hidden text-center">
+        <div className="mt-10 md:hidden text-center">
           <Link to="/shop?sort=new">
-            <button className="px-8 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest rounded shadow-lg">
+            <button className="px-8 py-3.5 bg-black text-white text-xs font-bold uppercase tracking-widest rounded shadow-lg hover:bg-[var(--color-primary)] transition-colors">
               View All New
             </button>
           </Link>
@@ -66,5 +61,4 @@ const NewArrivals = () => {
   );
 };
 
-// FIX: This 'default' export is what allows 'import NewArrivals from ...' to work
 export default NewArrivals;

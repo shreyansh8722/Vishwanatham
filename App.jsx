@@ -1,94 +1,71 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 
-// Layout Components
-import { Navbar } from './components/common/Navbar';
-import { Footer } from './components/common/Footer';
-import { CartModal } from './components/shop/CartModal';
-import { ScrollToTop } from './components/utils/ScrollToTop';
-import { WhatsAppButton } from './components/common/WhatsAppButton';
-import { LoginPromptModal } from './components/LoginPromptModal';
+// --- PROVIDERS ---
+import { AuthProvider } from './hooks/useAuth';
+import { CartProvider } from './context/CartContext';
+import { ProductProvider } from './context/ProductContext';
 
-// Pages
-import HomePage from './pages/HomePage';
+// --- COMPONENTS ---
+import Navbar from './components/common/Navbar';
+import Footer from './components/common/Footer';
+import CartModal from './components/shop/CartModal';
+
+// --- PAGES ---
+import Home from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
-import AboutPage from './pages/AboutPage';
-import ContactPage from './pages/ContactPage';
-import LoginPage from './pages/LoginPage';
-import ProfilePage from './pages/ProfilePage';
 import CheckoutPage from './pages/CheckoutPage';
-import OrderSuccessPage from './pages/OrderSuccessPage';
-import TrackOrderPage from './pages/TrackOrderPage';
-import NotFoundPage from './pages/NotFoundPage';
-import FAQPage from './pages/FAQPage';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsPage from './pages/TermsPage';
-import ReturnPolicy from './pages/ReturnPolicy';
-import AdminPage from './pages/AdminPage';
+import ConsultPage from './pages/ConsultPage';
+import ProfilePage from './pages/ProfilePage';
+import LoginPage from './pages/LoginPage';
+import AdminPage from './pages/AdminPage'; // <--- IMPORT THIS
 
-// Auth Protection
-import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
 function App() {
   return (
-    // GLOBAL STYLES: 
-    // bg-[#F9F7F2] = Warm Parchment (Eye Safety/Paper feel)
-    // font-body = Roboto
-    // text-[#2C2C2C] = Ebony (High Contrast)
-    <div className="flex flex-col min-h-screen bg-[#F9F7F2] text-[#2C2C2C] font-body selection:bg-[#FFDE59] selection:text-black">
-      <ScrollToTop />
-      
-      {/* Global Modals */}
-      <CartModal />
-      <LoginPromptModal />
-      
-      {/* Navigation */}
-      <Navbar />
-
-      {/* Main Content Area */}
-      <main className="flex-grow"> 
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/product/:id" element={<ProductDetailsPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/login" element={<LoginPage />} />
-    
-          <Route path="/track-order" element={<TrackOrderPage />} />
-          <Route path="/faq" element={<FAQPage />} />
+    <AuthProvider>
+      <ProductProvider>
+        <CartProvider>
           
-          <Route path="/rituals" element={<ShopPage />} />
-          <Route path="/challenge" element={<ShopPage />} />
-          
-          {/* Legal Pages */}
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/returns" element={<ReturnPolicy />} />
+          <div className="flex flex-col min-h-screen">
+            <ScrollToTop />
+            
+            <Navbar />
+            <CartModal />
 
-          {/* Protected Routes (User-only) */}
-          <Route element={<ProtectedRoute />}>
-             <Route path="/profile" element={<ProfilePage />} />
-             <Route path="/checkout" element={<CheckoutPage />} />
-             <Route path="/order-success" element={<OrderSuccessPage />} />
+            <main className="flex-grow">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/product/:id" element={<ProductDetailsPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/consult" element={<ConsultPage />} />
+                
+                {/* Auth Routes */}
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/login" element={<LoginPage />} />
 
-          </Route>
+                {/* ADMIN ROUTE - CONNECTED */}
+                <Route path="/admin" element={<AdminPage />} />
+                
+                <Route path="*" element={<div>404 Not Found</div>} />
+              </Routes>
+            </main>
 
-          {/* Admin Routes */}
-          <Route element={<AdminRoute />}>
-            <Route path="/admin/*" element={<AdminPage />} />
-          </Route>
+            <Footer />
+          </div>
 
-          {/* 404 Fallback */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </main>
-
-      <WhatsAppButton />
-      <Footer />
-    </div>
+        </CartProvider>
+      </ProductProvider>
+    </AuthProvider>
   );
 }
 

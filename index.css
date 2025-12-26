@@ -1,68 +1,69 @@
-/* shreyansh8722/vishwanatham/Vishwanatham-2348871e510016e627219d73c9bd6b32f3b7c3af/index.css */
+/* shreyansh8722/vishwanatham/Vishwanatham-8af283c72b7beb617911d6b52bf8d6f8f6a9b4fd/index.css */
 @import "tailwindcss";
 
-/* --- 1. GLOBAL MARQUEE ANIMATION (Must be outside @theme to work reliably) --- */
 @layer utilities {
   .animate-marquee {
     display: flex;
     width: max-content;
-    animation: marquee 60s linear infinite; /* Smooth, slow infinite scroll */
+    animation: marquee 60s linear infinite;
   }
-  .animate-marquee:hover {
-    animation-play-state: paused;
+  
+  /* Premium Glass Effect */
+  .glass-nav {
+    background: rgba(255, 253, 250, 0.85); /* Warm translucent base */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(231, 229, 228, 0.6);
+  }
+
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
   }
 }
 
 @keyframes marquee {
   0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); } /* Moves exactly half (seamless loop) */
+  100% { transform: translateX(-50%); }
 }
 
 @theme {
-  /* --- TYPOGRAPHY --- */
+  /* --- TYPOGRAPHY (Elegant) --- */
   --font-heading: "Crimson Pro", serif; 
   --font-body: "Inter", sans-serif;
 
-  /* --- VIBRANT BRAND PALETTE (Restored) --- */
+  /* --- ROYAL KASHI PALETTE --- */
   
-  /* 1. PRIMARY: Your specific vibrant Saffron/Red */
-  --color-primary: oklch(0.646 0.222 41.116);
+  /* Primary: Deep Vermilion/Saffron (The color of Sindoor/Hanuman Ji) */
+  --color-primary: #D94F04; 
+  --color-primary-dark: #9A3412;
   
-  /* 2. NEUTRALS: Sharp Contrast (No Faded Parchment) */
-  --color-black: #000000;
-  --color-white: #FFFFFF;
-  --color-gray-50: #F9FAFB;
-  --color-gray-100: #F3F4F6;
-  --color-gray-900: #111827;
+  /* Backgrounds: Warm Ivory & Cream (Paper feel) */
+  --color-bg-body: #FFFCF8;  /* Very subtle warm white */
+  --color-bg-subtle: #FDF6E3; /* Light parchment for sections */
+  
+  /* Text: Warm Charcoal (Softer than pure black) */
+  --color-text-main: #292524;
+  --color-text-muted: #57534E;
 
-  /* 3. FUNCTIONAL CATCHY COLORS */
-  --color-gold: #FACC15;       /* Bright Yellow for Offers/Stars */
-  --color-gold-dark: #CA8A04;
-  --color-success: #16A34A;    /* Sharp Green for Trust */
-  --color-alert: #DC2626;      /* Urgency Red */
+  /* Accents */
+  --color-gold: #B45309;       /* Antique Gold */
+  --color-gold-light: #F59E0B; /* Bright Gold for stars */
 
-  /* --- ANIMATIONS --- */
-  --animate-pulse-slow: pulseSlow 3s infinite;
-  --animate-shimmer: shimmer 2s linear infinite;
-  
-  @keyframes pulseSlow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
-  }
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
+  /* --- ELEVATION --- */
+  --shadow-card: 0 2px 8px -2px rgba(41, 37, 36, 0.05);
+  --shadow-card-hover: 0 12px 24px -6px rgba(217, 79, 4, 0.15); /* Orange glow on hover */
 }
 
 @layer base {
   body {
-    background-color: var(--color-white);
-    color: var(--color-black);
+    background-color: var(--color-bg-body);
+    color: var(--color-text-main);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    color: var(--color-text-main);
+    letter-spacing: -0.01em; /* Tighter, more elegant headings */
   }
 }

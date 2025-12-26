@@ -15,19 +15,14 @@ const LiveAstrologers = () => {
       <div className="container mx-auto px-4">
         
         {/* Header */}
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-end justify-between mb-12">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-               <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
-               </span>
-               <span className="text-[10px] font-bold uppercase tracking-widest text-red-600">Live Now</span>
-            </div>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-black">Chat with Astrologers</h2>
-            <p className="text-gray-500 mt-2 text-sm max-w-md">Get instant clarity on Career, Love & Health from verified Vedic experts.</p>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-black">
+              Chat with Astrologers
+            </h2>
+            <p className="text-gray-500 mt-4 text-sm max-w-md">Get instant clarity on Career, Love & Health from verified Vedic experts.</p>
           </div>
-          <Link to="/consult" className="hidden md:flex items-center gap-1 text-sm font-bold text-[var(--color-primary)] hover:text-black transition-colors">
+          <Link to="/consult" className="hidden md:flex items-center gap-1 text-sm font-bold text-[var(--color-primary)] hover:text-black transition-colors uppercase tracking-wider">
              View All Experts <ChevronRight size={16} />
           </Link>
         </div>

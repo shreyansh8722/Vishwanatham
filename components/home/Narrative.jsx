@@ -3,20 +3,22 @@ import { Sparkles } from 'lucide-react';
 
 export const Narrative = () => {
   return (
-    <section className="py-20 px-4 bg-heritage-paper text-center">
+    <section className="py-24 px-4 bg-white text-center border-t border-gray-100">
       <div className="max-w-3xl mx-auto animate-fade-up">
-        <div className="flex justify-center mb-6">
-           <Sparkles className="text-heritage-gold w-8 h-8 opacity-80" />
+        <div className="flex justify-center mb-8">
+           <div className="p-3 rounded-full bg-orange-50 text-[var(--color-primary)]">
+             <Sparkles className="w-6 h-6" />
+           </div>
         </div>
         
-        <h2 className="font-cinzel text-3xl md:text-5xl text-heritage-charcoal mb-8 leading-tight">
+        <h2 className="font-heading text-3xl md:text-5xl text-black mb-8 leading-tight font-bold">
           We don't just sell beads. <br/>
-          <span className="text-heritage-terracotta italic">We deliver blessings.</span>
+          <span className="text-[var(--color-primary)]">We deliver blessings.</span>
         </h2>
         
-        <div className="space-y-6 font-manrope text-lg text-heritage-grey leading-relaxed">
+        <div className="space-y-6 font-body text-lg text-gray-500 leading-relaxed font-light">
           <p>
-            In the noise of the modern world, finding <strong>Sukoon</strong> (Inner Peace) feels impossible. 
+            In the noise of the modern world, finding <strong className="text-black">Sukoon</strong> (Inner Peace) feels impossible. 
             You are constantly running, achieving, and worrying.
           </p>
           <p>
@@ -27,10 +29,10 @@ export const Narrative = () => {
         </div>
 
         <div className="mt-12">
-           <p className="font-cinzel font-bold text-sm tracking-widest text-heritage-terracotta uppercase">
+           <p className="font-heading font-bold text-xs tracking-[0.3em] text-black uppercase">
              Your Journey to Peace Begins Here
            </p>
-           <div className="w-16 h-0.5 bg-heritage-terracotta/30 mx-auto mt-4"></div>
+           <div className="w-12 h-1 bg-[var(--color-primary)] mx-auto mt-4 rounded-full"></div>
         </div>
       </div>
     </section>

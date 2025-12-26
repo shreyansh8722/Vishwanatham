@@ -26,24 +26,24 @@ const NewsletterPopup = () => {
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center px-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-heritage-charcoal/60 backdrop-blur-sm transition-opacity" onClick={handleClose}></div>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity" onClick={handleClose}></div>
       
       {/* Modal */}
-      <div className="relative bg-heritage-paper w-full max-w-md p-10 text-center shadow-2xl animate-scale-in border border-heritage-gold/20">
+      <div className="relative bg-white w-full max-w-md p-10 text-center shadow-2xl animate-scale-in rounded-lg border-t-4 border-[var(--color-primary)]">
         <button 
           onClick={handleClose}
-          className="absolute top-4 right-4 text-heritage-grey hover:text-heritage-rudraksha transition-colors"
+          className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
         
-        {/* Title - Serif */}
-        <h3 className="font-heading text-3xl md:text-4xl text-heritage-charcoal mb-3 font-medium">
+        {/* Title */}
+        <h3 className="font-heading text-3xl md:text-4xl text-black mb-3 font-bold">
           Join the Circle
         </h3>
         
-        {/* Body - Sans Serif */}
-        <p className="font-body text-xs text-heritage-grey mb-8 leading-relaxed max-w-xs mx-auto">
+        {/* Body */}
+        <p className="font-body text-xs text-gray-500 mb-8 leading-relaxed max-w-xs mx-auto">
           Subscribe to receive updates on new collections, spiritual insights from Kashi, and exclusive offers.
         </p>
         
@@ -51,19 +51,19 @@ const NewsletterPopup = () => {
           <input 
             type="email" 
             placeholder="YOUR EMAIL ADDRESS" 
-            className="w-full bg-transparent border-b border-heritage-grey/40 py-2 text-center text-sm font-body outline-none focus:border-heritage-rudraksha transition-colors placeholder:text-heritage-grey/50 text-heritage-charcoal uppercase tracking-wider"
+            className="w-full bg-gray-50 border border-gray-200 rounded py-3 text-center text-sm font-bold outline-none focus:border-black transition-colors placeholder:text-gray-400 text-black uppercase tracking-wider"
             required
           />
           <button 
             type="submit" 
-            className="bg-heritage-rudraksha text-white py-3.5 text-xs font-bold font-body uppercase tracking-[0.2em] hover:bg-heritage-gold transition-colors shadow-lg"
+            className="bg-black text-white py-3.5 text-xs font-bold font-body uppercase tracking-[0.2em] hover:bg-[var(--color-primary)] transition-colors shadow-lg rounded"
           >
             Subscribe
           </button>
         </form>
         
         <button 
-          className="mt-6 text-[10px] font-bold text-heritage-grey/60 uppercase tracking-widest hover:text-heritage-rudraksha transition-colors" 
+          className="mt-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-black transition-colors underline decoration-dotted" 
           onClick={handleClose}
         >
           No thanks, I prefer to browse

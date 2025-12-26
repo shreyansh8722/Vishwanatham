@@ -1,125 +1,217 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Phone, ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import BrandLogo from '../components/common/BrandLogo';
+import { useAuth } from '../hooks/useAuth'; // Connects to your fixed hook
+
+// Google Icon SVG Component
+const GoogleIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+);
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [method, setMethod] = useState('otp'); // 'otp' or 'password'
+  
+  // 1. Get Auth Functions from the Hook
+  const { login, signup, googleSignIn, user } = useAuth();
+  
+  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+  // 2. Form State
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // 3. Redirect if already logged in
+  useEffect(() => {
+    if (user) {
       navigate('/profile');
-    }, 1500);
+    }
+  }, [user, navigate]);
+
+  // 4. Handle Email/Password Submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        await login(email, password);
+      } else {
+        await signup(email, password, name);
+      }
+      // Success? The useEffect above will handle the redirect
+    } catch (err) {
+      console.error(err);
+      // Clean up Firebase error codes for display
+      const msg = err.code ? err.code.replace('auth/', '').replace(/-/g, ' ') : 'Failed to authenticate';
+      setError(msg.charAt(0).toUpperCase() + msg.slice(1));
+      setLoading(false);
+    }
+  };
+
+  // 5. Handle Google Login
+  const handleGoogleLogin = async () => {
+    try {
+      setError('');
+      setLoading(true);
+      await googleSignIn();
+      // Success? The useEffect above will handle the redirect
+    } catch (err) {
+      console.error(err);
+      setError('Google Sign-In Failed');
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-heritage-parchment flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 relative font-body">
       
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none" 
-           style={{ backgroundImage: 'radial-gradient(#BC002D 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+      {/* Background Decoration (Blobs) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-100 rounded-full blur-[100px] opacity-50"></div>
+         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-gray-200 rounded-full blur-[100px] opacity-50"></div>
       </div>
 
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-heritage-mist overflow-hidden relative z-10">
-        
-        {/* Header */}
-        <div className="bg-heritage-charcoal p-6 text-center">
-          <h2 className="font-heading text-2xl text-heritage-saffron font-bold">Welcome Back</h2>
-          <p className="text-gray-400 text-xs mt-1">Log in to access your saved Sankalp & Orders</p>
+      {/* Skip Button */}
+      <Link to="/" className="absolute top-6 right-6 text-xs font-bold text-gray-400 hover:text-black uppercase tracking-widest z-20">
+        Skip <span className="hidden sm:inline">to Store</span>
+      </Link>
+
+      {/* Main Card */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white w-full max-w-[420px] rounded-2xl shadow-2xl p-8 md:p-10 relative z-10"
+      >
+        <div className="text-center mb-8">
+          <BrandLogo className="h-8 mx-auto text-[var(--color-primary)] mb-6" />
+          <h1 className="font-heading text-3xl font-bold text-black mb-2">
+            {isLogin ? 'Welcome Back' : 'Join Us'}
+          </h1>
+          <p className="text-gray-500 text-sm">
+            {isLogin ? 'Enter your credentials to access your account.' : 'Create an account to track your spiritual journey.'}
+          </p>
         </div>
 
-        {/* Form Body */}
-        <div className="p-8">
+        {/* Error Alert */}
+        {error && (
+          <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-lg flex items-center gap-2 text-xs font-bold text-red-600 animate-pulse">
+             <AlertCircle size={16} /> {error}
+          </div>
+        )}
+
+        {/* Google Sign-In Button */}
+        <button 
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          type="button"
+          className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold text-sm hover:bg-gray-50 hover:border-gray-300 transition-all mb-6 disabled:opacity-50"
+        >
+          <GoogleIcon />
+          <span>{isLogin ? 'Sign in with Google' : 'Sign up with Google'}</span>
+        </button>
+
+        <div className="relative flex items-center justify-center mb-6">
+           <hr className="w-full border-gray-100" />
+           <span className="absolute bg-white px-3 text-[10px] text-gray-400 uppercase tracking-widest font-bold">Or Continue With</span>
+        </div>
+
+        {/* Main Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* Toggle Method */}
-          <div className="flex bg-heritage-parchment rounded-lg p-1 mb-8">
-            <button 
-              onClick={() => setMethod('otp')}
-              className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${method === 'otp' ? 'bg-white shadow text-heritage-rudraksha' : 'text-heritage-grey hover:text-heritage-charcoal'}`}
-            >
-              Login with OTP
-            </button>
-            <button 
-              onClick={() => setMethod('password')}
-              className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${method === 'password' ? 'bg-white shadow text-heritage-rudraksha' : 'text-heritage-grey hover:text-heritage-charcoal'}`}
-            >
-              Password
-            </button>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-6">
-            
-            {method === 'otp' ? (
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-heritage-charcoal uppercase tracking-wider">Mobile Number</label>
-                <div className="relative">
-                  <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-heritage-grey" />
-                  <input 
-                    type="tel" 
-                    placeholder="+91 98765 43210" 
-                    className="w-full pl-10 pr-4 py-3 border border-heritage-mist rounded-lg focus:border-heritage-rudraksha outline-none transition-colors"
-                    required
-                  />
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-heritage-charcoal uppercase tracking-wider">Email Address</label>
-                  <input 
-                    type="email" 
-                    placeholder="devotee@example.com" 
-                    className="w-full px-4 py-3 border border-heritage-mist rounded-lg focus:border-heritage-rudraksha outline-none transition-colors"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-heritage-charcoal uppercase tracking-wider">Password</label>
-                  <input 
-                    type="password" 
-                    placeholder="••••••••" 
-                    className="w-full px-4 py-3 border border-heritage-mist rounded-lg focus:border-heritage-rudraksha outline-none transition-colors"
-                    required
-                  />
-                </div>
-              </>
-            )}
-
-            <button 
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-heritage-rudraksha to-heritage-crimson text-white font-bold rounded-lg hover:shadow-lg transition-all flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <span className="animate-pulse">Verifying...</span>
-              ) : (
-                <>
-                  {method === 'otp' ? 'Get OTP' : 'Secure Login'} <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-
-          </form>
-
-          {/* Footer Links */}
-          <div className="mt-6 text-center space-y-4">
-            <p className="text-xs text-heritage-grey">
-              New to Vishwanatham? <Link to="/signup" className="text-heritage-rudraksha font-bold hover:underline">Create Account</Link>
-            </p>
-            
-            <div className="flex items-center justify-center gap-2 text-[10px] text-green-700 bg-green-50 py-2 rounded border border-green-100">
-              <ShieldCheck size={12} />
-              <span>Your personal details are 100% encrypted & secure.</span>
+          {/* Name Field (Signup Only) */}
+          {!isLogin && (
+            <div className="relative group">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
+              <input 
+                type="text" 
+                placeholder="Full Name" 
+                required 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all text-sm font-medium placeholder:text-gray-400"
+              />
             </div>
+          )}
+
+          {/* Email Field */}
+          <div className="relative group">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
+            <input 
+              type="email" 
+              placeholder="Email Address" 
+              required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all text-sm font-medium placeholder:text-gray-400"
+            />
           </div>
 
+          {/* Password Field */}
+          <div className="relative group">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
+            <input 
+              type="password" 
+              placeholder="Password" 
+              required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent rounded-xl outline-none focus:bg-white focus:border-black focus:ring-1 focus:ring-black transition-all text-sm font-medium placeholder:text-gray-400"
+            />
+          </div>
+
+          {/* Signup Terms Checkbox */}
+          {!isLogin && (
+            <div className="flex items-center gap-2 px-1">
+              <input type="checkbox" id="terms" className="accent-black w-3.5 h-3.5" required />
+              <label htmlFor="terms" className="text-[11px] text-gray-500 cursor-pointer">
+                I agree to the <span className="underline font-bold text-gray-700">Terms</span> & <span className="underline font-bold text-gray-700">Privacy Policy</span>
+              </label>
+            </div>
+          )}
+
+          {/* Forgot Password Link (Login Only) */}
+          {isLogin && (
+            <div className="text-right">
+              <button type="button" className="text-[11px] font-bold text-gray-400 hover:text-black transition-colors">Forgot Password?</button>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[var(--color-primary)] transition-colors shadow-lg flex items-center justify-center gap-2 mt-2 disabled:bg-gray-400"
+          >
+             {loading ? 'Processing...' : (isLogin ? 'Secure Login' : 'Create Account')} 
+             {!loading && <ArrowRight size={14} />}
+          </button>
+        </form>
+
+        {/* Toggle Login/Signup */}
+        <div className="mt-8 text-center pt-6 border-t border-gray-50">
+           <p className="text-sm text-gray-500">
+             {isLogin ? "New to Vishwanatham?" : "Already have an account?"}
+             <button 
+               onClick={() => { setIsLogin(!isLogin); setError(''); }}
+               className="ml-2 font-bold text-black hover:text-[var(--color-primary)] transition-colors underline decoration-2 decoration-gray-100 hover:decoration-[var(--color-primary)]"
+             >
+               {isLogin ? "Create Account" : "Sign In"}
+             </button>
+           </p>
         </div>
-      </div>
+
+      </motion.div>
     </div>
   );
 };

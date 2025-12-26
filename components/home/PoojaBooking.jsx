@@ -1,12 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Video, CheckCircle2, ArrowRight, Flame } from 'lucide-react';
-import { useSiteAssets } from '../../hooks/useSiteAssets'; // Connected to Admin
+import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { useSiteAssets } from '../../hooks/useSiteAssets'; 
 
 const PoojaBooking = () => {
   const { getAsset } = useSiteAssets();
-
-  // Fetch image from Admin -> Key: 'pooja_booking_bg'
   const featureImage = getAsset('pooja_booking_bg', 'https://placehold.co/800x600/e2e8f0/1e293b?text=Add+Pooja+Image');
 
   return (
@@ -15,7 +13,7 @@ const PoojaBooking = () => {
         
         <div className="flex flex-col md:flex-row items-center bg-black rounded-3xl overflow-hidden shadow-2xl">
            
-           {/* Left: Dynamic Image from Admin */}
+           {/* Left: Image */}
            <div className="w-full md:w-1/2 h-[400px] md:h-[500px] relative">
               <img 
                 src={featureImage} 
@@ -23,26 +21,16 @@ const PoojaBooking = () => {
                 className="w-full h-full object-cover opacity-90"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 md:hidden"></div>
-              
-              {/* Overlay Badge */}
-              <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20">
-                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                 <span className="text-white text-xs font-bold uppercase tracking-wider">Live from Kashi</span>
-              </div>
            </div>
 
            {/* Right: Content */}
            <div className="w-full md:w-1/2 p-8 md:p-16 text-white relative">
-              {/* Background Glow */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-primary)] opacity-20 blur-[80px] pointer-events-none"></div>
 
               <div className="relative z-10">
-                 <span className="inline-flex items-center gap-2 bg-[var(--color-primary)] text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6">
-                    <Video size={12} /> Live Streaming Available
-                 </span>
                  
                  <h2 className="font-heading text-3xl md:text-5xl font-bold mb-6 leading-tight">
-                    Book a Ritual at <br/> <span className="text-yellow-400">Kashi Vishwanath</span>
+                    Book a Ritual at <br/> <span className="text-[var(--color-primary)]">Kashi Vishwanath</span>
                  </h2>
                  
                  <p className="text-gray-300 text-lg mb-8 leading-relaxed font-light">
@@ -65,7 +53,7 @@ const PoojaBooking = () => {
                  
                  <div className="flex flex-col sm:flex-row gap-4">
                     <Link to="/pooja-services">
-                       <button className="bg-white text-black px-8 py-4 rounded-full font-bold text-sm uppercase tracking-widest hover:bg-yellow-400 transition-colors flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                       <button className="bg-white text-black px-8 py-4 rounded-full font-bold text-sm uppercase tracking-widest hover:bg-[var(--color-primary)] hover:text-white transition-colors flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
                           Book Pooja Slot <ArrowRight size={16} />
                        </button>
                     </Link>
