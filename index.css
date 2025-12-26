@@ -1,86 +1,68 @@
+/* shreyansh8722/vishwanatham/Vishwanatham-2348871e510016e627219d73c9bd6b32f3b7c3af/index.css */
 @import "tailwindcss";
+
+/* --- 1. GLOBAL MARQUEE ANIMATION (Must be outside @theme to work reliably) --- */
+@layer utilities {
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 60s linear infinite; /* Smooth, slow infinite scroll */
+  }
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); } /* Moves exactly half (seamless loop) */
+}
 
 @theme {
   /* --- TYPOGRAPHY --- */
   --font-heading: "Crimson Pro", serif; 
-  --font-body: "Roboto", sans-serif;
+  --font-body: "Inter", sans-serif;
 
-  /* --- SACRED PALETTE --- */
+  /* --- VIBRANT BRAND PALETTE (Restored) --- */
   
-  /* 1. VEDIC CRIMSON (Primary Action) */
-  --color-heritage-rudraksha: #BC002D; 
-  --color-heritage-crimson: #9F1239;   
-
-  /* 2. SAFFRON GOLD (Trust) */
-  --color-heritage-saffron: #FFDE59;
-  --color-heritage-gold: #F59E0B;
-
-  /* 3. RUDRAKSHA BROWN (Secondary Action - NEW) */
-  /* A deep, sacred wood tone. Replaces the "odd" Olive. */
-  --color-heritage-brown: #5D4037; 
-  --color-heritage-coffee: #3E2723;
-
-  /* 4. WARM CHARCOAL (Text) */
-  --color-heritage-charcoal: #2C2C2C;
-  --color-heritage-ebony: #1A1A1A;
-
-  /* 5. OLIVE (Keep for 'Consult' only, NOT for COD) */
-  --color-heritage-olive: #8C8000;
-
-  /* 6. BACKGROUNDS */
-  --color-heritage-parchment: #F9F7F2; 
-  --color-heritage-mist: #E5E5E5;
+  /* 1. PRIMARY: Your specific vibrant Saffron/Red */
+  --color-primary: oklch(0.646 0.222 41.116);
   
-  /* 7. ALERTS */
-  --color-alert-red: #DC2626;   
-  --color-alert-yellow: #B45309; 
-  --color-alert-green: #15803D;
+  /* 2. NEUTRALS: Sharp Contrast (No Faded Parchment) */
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+  --color-gray-50: #F9FAFB;
+  --color-gray-100: #F3F4F6;
+  --color-gray-900: #111827;
+
+  /* 3. FUNCTIONAL CATCHY COLORS */
+  --color-gold: #FACC15;       /* Bright Yellow for Offers/Stars */
+  --color-gold-dark: #CA8A04;
+  --color-success: #16A34A;    /* Sharp Green for Trust */
+  --color-alert: #DC2626;      /* Urgency Red */
 
   /* --- ANIMATIONS --- */
+  --animate-pulse-slow: pulseSlow 3s infinite;
   --animate-shimmer: shimmer 2s linear infinite;
-  --animate-pulse-glow: pulseGlow 2s infinite;
-  --animate-marquee: marquee 20s linear infinite;
-  --animate-fade-in: fadeIn 0.5s ease-out;
-
+  
+  @keyframes pulseSlow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
   @keyframes shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-  }
-
-  @keyframes pulseGlow {
-    0% { box-shadow: 0 0 0 0 rgba(188, 0, 45, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(188, 0, 45, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(188, 0, 45, 0); }
-  }
-
-  @keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
 }
 
 @layer base {
-  html { overflow-x: hidden; width: 100%; scroll-behavior: smooth; }
   body {
-    background-color: var(--color-heritage-parchment);
-    color: var(--color-heritage-ebony);
+    background-color: var(--color-white);
+    color: var(--color-black);
     font-family: var(--font-body);
-    line-height: 1.6; 
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    font-weight: 700;
-    letter-spacing: -0.01em;
   }
-  input, textarea, select { font-family: var(--font-body); outline: none; }
 }
-
-/* Utilities */
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
