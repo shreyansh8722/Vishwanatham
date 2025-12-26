@@ -1,76 +1,109 @@
 import React, { useState } from 'react';
-import { SEO } from '../components/SEO';
-import { Package, Truck, CheckCircle, Clock } from 'lucide-react';
+import { PageHeader } from '../components/common/PageHeader';
+import { Package, Search, CheckCircle2, Clock, MapPin } from 'lucide-react';
 
 const TrackOrderPage = () => {
   const [orderId, setOrderId] = useState('');
-  const [status, setStatus] = useState(null); // 'processing', 'shipped', 'delivered'
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleTrack = (e) => {
     e.preventDefault();
-    // Simulate tracking logic
-    setTimeout(() => setStatus('shipped'), 1000);
+    if (!orderId) return;
+    
+    setLoading(true);
+    // Simulate API Delay
+    setTimeout(() => {
+       setStatus({
+          id: orderId,
+          currentStep: 2,
+          steps: [
+             { title: "Order Placed", date: "Oct 24, 10:00 AM", completed: true, icon: Package },
+             { title: "Energization (Pooja)", date: "Oct 25, 08:00 AM", completed: true, icon: CheckCircle2 },
+             { title: "Dispatched", date: "Expected Today", completed: false, icon: Truck },
+             { title: "Delivered", date: "---", completed: false, icon: MapPin }
+          ]
+       });
+       setLoading(false);
+    }, 1500);
   };
 
   return (
-    <div className="bg-heritage-paper min-h-screen pt-24 pb-20">
-      <SEO title="Track Order" />
-      <div className="container mx-auto px-6 max-w-3xl">
-        <h1 className="font-cormorant text-4xl text-heritage-charcoal text-center mb-2">Track Your Blessing</h1>
-        <p className="text-center text-heritage-grey text-sm font-montserrat mb-12">Enter your Order ID to see the status of your sacred package.</p>
-
-        <form onSubmit={handleTrack} className="flex gap-4 mb-16 max-w-md mx-auto">
-          <input 
-            type="text" 
-            value={orderId}
-            onChange={(e) => setOrderId(e.target.value)}
-            placeholder="Order ID (e.g. VISH-1234)" 
-            className="flex-1 p-4 border border-heritage-border bg-white focus:outline-none focus:border-heritage-gold text-heritage-charcoal uppercase tracking-wider text-sm"
-            required
-          />
-          <button className="bg-heritage-gold text-white px-8 py-4 uppercase tracking-widest text-xs font-bold hover:bg-heritage-clay transition-colors">
-            Track
-          </button>
-        </form>
-
-        {status && (
-          <div className="bg-white p-10 rounded-sm shadow-sm border border-heritage-border animate-fade-in-up">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-heritage-mist pb-6">
-              <div>
-                <span className="block text-[10px] uppercase tracking-widest text-heritage-grey">Order Status</span>
-                <span className="font-cormorant text-2xl text-heritage-charcoal">In Transit</span>
-              </div>
-              <div className="mt-4 md:mt-0 text-right">
-                <span className="block text-[10px] uppercase tracking-widest text-heritage-grey">Estimated Delivery</span>
-                <span className="font-montserrat text-sm font-bold text-heritage-gold">Dec 24, 2025</span>
-              </div>
+    <div className="bg-white min-h-screen pb-20 font-body">
+      <PageHeader title="Track Order" />
+      
+      <div className="container mx-auto px-4 pt-24 max-w-xl">
+         
+         <div className="text-center mb-12 animate-fade-in">
+            <div className="w-16 h-16 bg-heritage-parchment rounded-full flex items-center justify-center mx-auto mb-4 border border-heritage-mist">
+               <Package size={32} className="text-heritage-rudraksha" />
             </div>
+            <h1 className="font-heading text-3xl font-bold text-heritage-charcoal mb-2">Where is my order?</h1>
+            <p className="text-heritage-grey text-sm">Enter the Order ID sent to your WhatsApp.</p>
+         </div>
 
-            {/* Timeline */}
-            <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-8 md:gap-0">
-              {/* Line (Desktop) */}
-              <div className="absolute top-5 left-0 w-full h-[2px] bg-heritage-mist hidden md:block -z-10"></div>
-              
-              {/* Steps */}
-              {[
-                { label: "Order Placed", icon: Clock, active: true },
-                { label: "Dispatched", icon: Package, active: true },
-                { label: "In Transit", icon: Truck, active: true, current: true },
-                { label: "Delivered", icon: CheckCircle, active: false }
-              ].map((step, idx) => (
-                <div key={idx} className={`flex md:flex-col items-center gap-4 md:gap-2 bg-white md:bg-transparent pr-4 md:pr-0 ${step.active ? 'opacity-100' : 'opacity-40'}`}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${step.current ? 'border-heritage-gold bg-heritage-paper text-heritage-gold' : step.active ? 'bg-heritage-gold border-heritage-gold text-white' : 'border-heritage-border bg-white text-heritage-grey'}`}>
-                    <step.icon size={16} />
+         <form onSubmit={handleTrack} className="flex gap-3 mb-12 shadow-lg rounded-2xl p-2 bg-white border border-heritage-mist">
+            <input 
+              type="text" 
+              placeholder="e.g. VSN-8293"
+              className="flex-1 pl-6 pr-4 py-3 bg-transparent outline-none font-bold text-heritage-charcoal placeholder:font-normal"
+              value={orderId}
+              onChange={(e) => setOrderId(e.target.value)}
+            />
+            <button className="bg-heritage-charcoal text-white px-8 rounded-xl font-bold hover:bg-black transition-colors flex items-center gap-2">
+               {loading ? '...' : <><Search size={18}/> Track</>}
+            </button>
+         </form>
+
+         {status && (
+            <div className="bg-white border border-heritage-mist rounded-3xl p-8 shadow-xl animate-fade-in">
+               <div className="flex items-center justify-between mb-10 border-b border-heritage-mist pb-4">
+                  <div>
+                     <span className="text-xs text-heritage-grey uppercase font-bold block">Order ID</span>
+                     <span className="font-heading font-bold text-xl text-heritage-charcoal">#{status.id}</span>
                   </div>
-                  <span className="text-xs uppercase tracking-wider font-bold text-heritage-charcoal">{step.label}</span>
-                </div>
-              ))}
+                  <span className="text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-200 px-3 py-1 rounded-full flex items-center gap-1">
+                     <Clock size={12} /> In Transit
+                  </span>
+               </div>
+
+               <div className="relative space-y-0">
+                  {/* Vertical Line */}
+                  <div className="absolute left-[19px] top-2 bottom-10 w-0.5 bg-heritage-mist"></div>
+
+                  {status.steps.map((step, idx) => (
+                     <div key={idx} className="relative pl-12 pb-10 last:pb-0 group">
+                        {/* Status Icon */}
+                        <div className={`absolute left-0 top-0 w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm z-10 transition-colors duration-500 ${
+                           step.completed 
+                              ? 'bg-heritage-rudraksha text-white' 
+                              : idx === status.currentStep 
+                                 ? 'bg-heritage-gold text-white animate-pulse' 
+                                 : 'bg-heritage-mist text-white'
+                        }`}>
+                           <CheckCircle2 size={16} />
+                        </div>
+                        
+                        <div>
+                           <h4 className={`font-bold text-base transition-colors ${step.completed || idx === status.currentStep ? 'text-heritage-charcoal' : 'text-gray-400'}`}>
+                              {step.title}
+                           </h4>
+                           <p className="text-xs text-heritage-grey mt-1 font-medium bg-heritage-parchment inline-block px-2 py-0.5 rounded">
+                              {step.date}
+                           </p>
+                        </div>
+                     </div>
+                  ))}
+               </div>
             </div>
-          </div>
-        )}
+         )}
+
       </div>
     </div>
   );
 };
+
+// Helper Icon component for timeline not strictly needed as we used CheckCircle2 universally for cleanliness
+import { Truck as TruckIcon } from 'lucide-react'; // Renamed to avoid conflict
 
 export default TrackOrderPage;

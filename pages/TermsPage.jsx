@@ -1,43 +1,39 @@
 import React from 'react';
-import { SEO } from '../components/SEO';
+import { PageHeader } from '../components/common/PageHeader';
 
 const TermsPage = () => {
   return (
-    <div className="bg-heritage-paper min-h-screen pt-24 pb-20">
-      <SEO title="Terms of Service" />
-      <div className="container mx-auto px-6 max-w-5xl">
-        <h1 className="font-cormorant text-4xl md:text-5xl text-heritage-charcoal mb-2 text-center">Terms of Service</h1>
-        <p className="text-center text-heritage-grey text-xs uppercase tracking-widest mb-16">Last Updated: December 20, 2025</p>
+    <div className="bg-white min-h-screen pb-20 font-body">
+      <PageHeader title="Terms & Conditions" />
 
-        <div className="flex flex-col md:flex-row gap-12">
-          {/* Sidebar Navigation */}
-          <div className="w-full md:w-1/4">
-            <ul className="sticky top-32 space-y-4 text-sm font-montserrat border-l-2 border-heritage-border pl-4">
-              <li><a href="#general" className="text-heritage-charcoal font-bold hover:text-heritage-gold block">1. General Conditions</a></li>
-              <li><a href="#products" className="text-heritage-grey hover:text-heritage-gold block">2. Products & Services</a></li>
-              <li><a href="#payments" className="text-heritage-grey hover:text-heritage-gold block">3. Payments</a></li>
-              <li><a href="#shipping" className="text-heritage-grey hover:text-heritage-gold block">4. Shipping & Returns</a></li>
-            </ul>
-          </div>
-
-          {/* Content */}
-          <div className="w-full md:w-3/4 space-y-12 font-montserrat text-heritage-grey leading-relaxed text-sm">
-            <section id="general">
-              <h3 className="font-cormorant text-2xl text-heritage-charcoal mb-4">1. General Conditions</h3>
-              <p>By agreeing to these Terms of Service, you represent that you are at least the age of majority in your state or province of residence. You may not use our products for any illegal or unauthorized purpose nor may you, in the use of the Service, violate any laws in your jurisdiction.</p>
+      <div className="container mx-auto px-4 pt-24 max-w-3xl">
+         <div className="prose prose-stone max-w-none">
+            <h1 className="font-heading text-3xl font-bold text-heritage-charcoal mb-6">Terms of Service</h1>
+            <p className="text-heritage-grey mb-8">Last Updated: October 2024</p>
+            
+            <section className="mb-8">
+               <h3 className="font-heading text-xl font-bold text-heritage-charcoal mb-3">1. Introduction</h3>
+               <p className="text-heritage-grey leading-relaxed">
+                  Welcome to Vishwanatham. By accessing our website, you agree to these terms. 
+                  Our products are spiritual in nature and outcomes may vary based on individual belief and karma.
+               </p>
             </section>
 
-            <section id="products">
-              <h3 className="font-cormorant text-2xl text-heritage-charcoal mb-4">2. Products & Services</h3>
-              <p>Certain products or services may be available exclusively online through the website. These products or services may have limited quantities and are subject to return or exchange only according to our Return Policy. We have made every effort to display as accurately as possible the colors and images of our products.</p>
+            <section className="mb-8">
+               <h3 className="font-heading text-xl font-bold text-heritage-charcoal mb-3">2. Authenticity Guarantee</h3>
+               <p className="text-heritage-grey leading-relaxed">
+                  We guarantee that all Rudraksha and gemstones sold are natural. However, natural products may have minor surface imperfections which are not defects but proof of authenticity.
+               </p>
             </section>
-
-            <section id="payments">
-              <h3 className="font-cormorant text-2xl text-heritage-charcoal mb-4">3. Payments</h3>
-              <p>We accept major credit cards, UPI, and Net Banking. All prices are in INR. We reserve the right to refuse any order you place with us.</p>
+            
+            <section className="mb-8">
+               <h3 className="font-heading text-xl font-bold text-heritage-charcoal mb-3">3. Pricing & Payments</h3>
+               <p className="text-heritage-grey leading-relaxed">
+                  All prices are inclusive of GST. We reserve the right to change prices without notice. 
+                  Payment must be received in full before dispatch for prepaid orders.
+               </p>
             </section>
-          </div>
-        </div>
+         </div>
       </div>
     </div>
   );
